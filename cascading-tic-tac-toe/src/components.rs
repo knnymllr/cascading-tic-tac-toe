@@ -1,5 +1,5 @@
 use crate::CellState;
-use bevy::prelude::Component;
+//! use bevy::prelude::Component;
 
 #[derive(Component, Clone)]
 pub struct TicTacToeCell {
