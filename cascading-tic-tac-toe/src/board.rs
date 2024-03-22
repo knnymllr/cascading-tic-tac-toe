@@ -15,7 +15,24 @@ impl Plugin for BoardPlugin {
             .add_event::<CellClickedEvent>()
             .add_systems(OnEnter(PlayingState::Local), setup_board)
             .add_systems(
-                Update(GameState::GameOngoing),
+                OnTransition {
+                    from: GameState::GameOngoing,
+                    to: GameState::Won(Player::X),
+                },
+                (board_cell_interaction_system, on_cell_clicked),
+            )
+            .add_systems(
+                OnTransition {
+                    from: GameState::GameOngoing,
+                    to: GameState::Won(Player::O),
+                },
+                (board_cell_interaction_system, on_cell_clicked),
+            )
+            .add_systems(
+                OnTransition {
+                    from: GameState::GameOngoing,
+                    to: GameState::Draw,
+                },
                 (board_cell_interaction_system, on_cell_clicked),
             );
     }
@@ -224,23 +241,23 @@ pub fn button_text(
 }
 
 pub fn setup_board(mut commands: Commands, theme: Res<UiTheme>, asset_server: Res<AssetServer>) {
-    commands.spawn_bundle(Camera2dBundle::default());
+    commands.spawn(Camera2dBundle::default());
 
-    commands.spawn_bundle(root(&theme)).with_children(|parent| {
+    commands.spawn(root(&theme)).with_children(|parent| {
         parent
-            .spawn_bundle(main_border(&theme))
+            .spawn(main_border(&theme))
             .with_children(|parent| {
                 for row_index in 0..3 {
-                    parent.spawn_bundle(square_row()).with_children(|parent| {
+                    parent.spawn(square_row()).with_children(|parent| {
                         for column_index in 1..=3 {
                             let cell_id = 3 * row_index + column_index - 1;
                             parent
-                                .spawn_bundle(square_border(&theme))
+                                .spawn(square_border(&theme))
                                 .with_children(|parent| {
                                     parent
-                                        .spawn_bundle(button(&theme))
+                                        .spawn(button(&theme))
                                         .with_children(|parent| {
-                                            parent.spawn_bundle(button_text(
+                                            parent.spawn(button_text(
                                                 &asset_server,
                                                 &theme,
                                                 "",

@@ -75,11 +75,11 @@ fn setup_restart_button(
     theme: Res<UiTheme>,
     asset_server: Res<AssetServer>,
 ) {
-    commands.spawn_bundle(root()).with_children(|parent| {
+    commands.spawn(root()).with_children(|parent| {
         parent
-            .spawn_bundle(button(&theme))
+            .spawn(button(&theme))
             .with_children(|parent| {
-                parent.spawn_bundle(button_text(&asset_server, &theme, "New Game"));
+                parent.spawn(button_text(&asset_server, &theme, "New Game"));
             })
             .insert(ReloadButton);
     });
