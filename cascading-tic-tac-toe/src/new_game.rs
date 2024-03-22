@@ -130,7 +130,7 @@ fn reload_game(
         commands.entity(entity).despawn_recursive();
     }
     playing_state
-        .set(Box::new(PlayingState::Local) as Box<dyn Reflect>)
+        .set(Box::new(PlayingState::NotPlaying) as Box<dyn Reflect>)
         .expect("Could not set game state.");
 
     if game_state.get() != &GameState::GameOngoing {
