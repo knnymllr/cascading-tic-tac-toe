@@ -1,32 +1,32 @@
-use bevy::ecs::prelude::States;
+use bevy::prelude::States;
 
-#[derive(States, Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash, States)]
 pub enum Player {
     X,
     O,
 }
 
-#[derive(States, Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash, States)]
 pub enum PlayerTurn {
     X,
     O,
 }
 
-#[derive(States, Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash, States)]
 pub enum CellState {
     Empty,
     Filled(Player),
     Grid,
 }
 
-#[derive(States, Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash, States)]
 pub enum GameState {
     Won(Player),
     Draw,
     GameOngoing,
 }
 
-#[derive(States, Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash, States)]
 pub enum PlayingState {
     NotPlaying,
     Local,

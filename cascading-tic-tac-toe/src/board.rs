@@ -60,7 +60,7 @@ pub fn board_cell_interaction_system(
         }
 
         match *interaction {
-            Interaction::Clicked => {
+            Interaction::Pressed => {
                 send_cell_clicked.send(CellClickedEvent { entity });
                 *color = theme.button;
             }
@@ -76,7 +76,7 @@ pub fn on_cell_clicked(
     mut cell_text_query: Query<&mut Text>,
     mut player_turn_state: ResMut<State<PlayerTurn>>,
 ) {
-    let player_turn = player_turn_state.current().clone();
+    let player_turn = player_turn_state.get().clone();
 
     for event in events.iter() {
         let (mut cell, children) = cell_query
@@ -114,7 +114,7 @@ fn update_cell_text(
 }
 
 fn update_player_turn(player_turn_state: &mut ResMut<State<PlayerTurn>>) {
-    let player_turn = player_turn_state.current().clone();
+    let player_turn = player_turn_state.get().clone();
     let next_state = match player_turn {
         PlayerTurn::X => PlayerTurn::O,
         PlayerTurn::O => PlayerTurn::X,
@@ -125,8 +125,8 @@ fn update_player_turn(player_turn_state: &mut ResMut<State<PlayerTurn>>) {
 pub fn root(theme: &Res<UiTheme>) -> NodeBundle {
     NodeBundle {
         style: Style {
-            width: Sized::new(Val::Percent(100.0)),
-            height: Sized::new(Val::Percent(100.0)),
+            width: Val::Percent(100.0),
+            height: Val::Percent(100.0),
             flex_direction: FlexDirection::ColumnReverse,
             justify_content: JustifyContent::Center,
             align_items: AlignItems::Center,
@@ -140,9 +140,9 @@ pub fn root(theme: &Res<UiTheme>) -> NodeBundle {
 pub fn main_border(theme: &Res<UiTheme>) -> NodeBundle {
     NodeBundle {
         style: Style {
-            width: Sized::new(Val::Auto),
-            height: Sized::new(Val::Auto),
-            border: Rect::all(Val::Px(2.0)),
+            width: Val::Auto,
+            height: Val::Auto,
+            border: UiRect::all(Val::Px(2.0)),
             flex_direction: FlexDirection::ColumnReverse,
             ..Default::default()
         },
@@ -154,8 +154,8 @@ pub fn main_border(theme: &Res<UiTheme>) -> NodeBundle {
 pub fn square_row() -> NodeBundle {
     NodeBundle {
         style: Style {
-            width: Sized::new(Val::Auto),
-            height: Sized::new(Val::Auto),
+            width: Val::Auto,
+            height: Val::Auto,
             ..Default::default()
         },
         ..Default::default()
@@ -165,9 +165,9 @@ pub fn square_row() -> NodeBundle {
 pub fn square_border(theme: &Res<UiTheme>) -> NodeBundle {
     NodeBundle {
         style: Style {
-            width: Sized::new(Val::Px(50.0)),
-            height: Sized::new(Val::Px(50.0)),
-            border: Rect::all(Val::Px(2.0)),
+            width: Val::Px(50.0),
+            height: Val::Px(50.0),
+            border: UiRect::all(Val::Px(2.0)),
             ..Default::default()
         },
         background_color: theme.border.clone(),
@@ -178,12 +178,12 @@ pub fn square_border(theme: &Res<UiTheme>) -> NodeBundle {
 pub fn menu_background(theme: &Res<UiTheme>) -> NodeBundle {
     NodeBundle {
         style: Style {
-            width: Sized::new(Val::Percent(100.0)),
-            height: Sized::new(Val::Percent(100.0)),
+            width: Val::Percent(100.0),
+            height: Val::Percent(100.0),
             align_items: AlignItems::Center,
             justify_content: JustifyContent::Center,
             flex_direction: FlexDirection::ColumnReverse,
-            padding: Rect::all(Val::Px(5.0)),
+            padding: UiRect::all(Val::Px(5.0)),
             ..Default::default()
         },
         background_color: theme.menu.clone(),
@@ -194,8 +194,8 @@ pub fn menu_background(theme: &Res<UiTheme>) -> NodeBundle {
 pub fn button(theme: &Res<UiTheme>) -> ButtonBundle {
     ButtonBundle {
         style: Style {
-            width: Sized::new(Val::Percent(100.0)),
-            height: Sized::new(Val::Percent(100.0)),
+            width: Val::Percent(100.0),
+            height: Val::Percent(100.0),
             justify_content: JustifyContent::Center,
             align_items: AlignItems::Center,
             ..Default::default()
@@ -211,14 +211,13 @@ pub fn button_text(
     label: &str,
 ) -> TextBundle {
     return TextBundle {
-        text: Text::with_section(
+        text: Text::from_section(
             label,
             TextStyle {
                 font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                 font_size: 30.0,
                 color: theme.button_text.clone(),
             },
-            Default::default(),
         ),
         ..Default::default()
     };
