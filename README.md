@@ -1,6 +1,9 @@
 # Project Name
 Put here a short paragraph describing your project. 
-Adding an screenshot or a mockup of your application in action would be nice.  
+Adding an screenshot or a mockup of your application in action would be nice.
+
+## Team Member
+Xu Jiang
 
 ![This is a screenshot.](images.png)
 # How to run
