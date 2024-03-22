@@ -95,7 +95,7 @@ pub fn on_cell_clicked(
 ) {
     let player_turn = player_turn_state.get().clone();
 
-    for event in events.iter() {
+    for event in events.read() {
         let (mut cell, children) = cell_query
             .get_mut(event.entity)
             .expect("on_cell_clicked: Cell not found.");

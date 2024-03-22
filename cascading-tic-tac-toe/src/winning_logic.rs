@@ -20,9 +20,27 @@ pub struct WinningLogicPlugin;
 
 impl Plugin for WinningLogicPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(OnTransition{ from: GameState::GameOngoing, to: GameState::Won(Player::X) }, is_game_over)
-           .add_systems(OnTransition{ from: GameState::GameOngoing, to: GameState::Won(Player::O) }, is_game_over)
-           .add_systems(OnTransition{ from: GameState::GameOngoing, to: GameState::Draw }, is_game_over);
+        app.add_systems(
+            OnTransition {
+                from: GameState::GameOngoing,
+                to: GameState::Won(Player::X),
+            },
+            is_game_over,
+        )
+        .add_systems(
+            OnTransition {
+                from: GameState::GameOngoing,
+                to: GameState::Won(Player::O),
+            },
+            is_game_over,
+        )
+        .add_systems(
+            OnTransition {
+                from: GameState::GameOngoing,
+                to: GameState::Draw,
+            },
+            is_game_over,
+        );
     }
 }
 
