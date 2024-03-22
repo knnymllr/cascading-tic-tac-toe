@@ -9,10 +9,22 @@ pub struct NewGamePlugin;
 
 impl Plugin for NewGamePlugin {
     fn build(&self, app: &mut App) {
-        app
-        .add_systems(OnEnter(PlayingState::Local), setup_restart_button)
-        .add_systems(Update, reload_button_interactions)
-        .add_systems(OnEnter(PlayingState::NotPlaying), reload_game);
+        app.add_systems(OnEnter(PlayingState::Local), setup_restart_button)
+            .add_systems(
+                OnTransition {
+                    from: PlayingState::NotPlaying,
+                    to: PlayingState::Local,
+                },
+                reload_button_interactions,
+            )
+            .add_systems(
+                OnTransition {
+                    from: PlayingState::Local,
+                    to: PlayingState::NotPlaying,
+                },
+                reload_button_interactions,
+            )
+            .add_systems(OnEnter(PlayingState::NotPlaying), reload_game);
     }
 }
 
@@ -64,7 +76,7 @@ pub fn button_text(
                 font: asset_server.load("fonts/FiraMono-Medium.ttf"),
                 font_size: 20.0,
                 color: theme.button_text.clone(),
-            }
+            },
         ),
         ..Default::default()
     };
@@ -98,7 +110,7 @@ fn reload_button_interactions(
             Interaction::Pressed => {
                 *color = theme.button;
                 game_state
-                    .set(Box::new(PlayingState::NotPlaying) as Box<dyn Reflect>)
+                    .set(Box::new(PlayingState::Local) as Box<dyn Reflect>)
                     .expect("Could not set game state.");
             }
             Interaction::Hovered => *color = theme.button_hovered,
