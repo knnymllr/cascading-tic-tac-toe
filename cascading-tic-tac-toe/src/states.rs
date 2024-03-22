@@ -1,6 +1,6 @@
-use bevy::ecs::prelude::States;
+use bevy::prelude::{Reflect, States};
 
-#[derive(States, Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Reflect, States, Debug, Clone, Eq, PartialEq, Hash)]
 pub enum Player {
     X,
     O,
@@ -19,7 +19,7 @@ pub enum CellState {
     Grid,
 }
 
-#[derive(States, Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Reflect, States, Debug, Clone, Eq, PartialEq, Hash)]
 pub enum GameState {
     Won(Player),
     Draw,
