@@ -1,0 +1,90 @@
+use bevy::prelude::*;
+
+use crate::{CellState, GameState, Player, TicTacToeCell};
+
+const WINNING_COMBINATIONS: [[usize; 3]; 8] = [
+    // horizontal
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    // vertical
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    // diagonals
+    [0, 4, 8],
+    [2, 4, 6],
+];
+
+pub struct WinningLogicPlugin;
+
+impl Plugin for WinningLogicPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(OnTransition{ from: GameState::GameOngoing, to: GameState::Won(Player::X) }, is_game_over)
+           .add_systems(OnTransition{ from: GameState::GameOngoing, to: GameState::Won(Player::O) }, is_game_over)
+           .add_systems(OnTransition{ from: GameState::GameOngoing, to: GameState::Draw }, is_game_over);
+    }
+}
+
+pub fn is_game_over(
+    cells_query: Query<&TicTacToeCell>,
+    mut update_winner: ResMut<State<GameState>>,
+) {
+    let mut cells = vec![CellState::Empty; 9];
+    for cell in cells_query.iter() {
+        cells[cell.cell_id as usize] = cell.state.clone();
+    }
+
+    if is_winner(&cells, Player::X) {
+        update_winner
+            .set(Box::new(GameState::Won(Player::X)) as Box<dyn Reflect>)
+            .expect("Cannot update winner state");
+    } else if is_winner(&cells, Player::O) {
+        update_winner
+            .set(Box::new(GameState::Won(Player::O)) as Box<dyn Reflect>)
+            .expect("Cannot update winner state");
+    } else if is_draw(&cells) {
+        update_winner
+            .set(Box::new(GameState::Draw) as Box<dyn Reflect>)
+            .expect("Cannot update winner state");
+    }
+}
+
+fn is_winner(cells: &Vec<CellState>, player: Player) -> bool {
+    let state = CellState::Filled(player);
+    for winning_combination in WINNING_COMBINATIONS {
+        if cells[winning_combination[0]] == state
+            && cells[winning_combination[1]] == state
+            && cells[winning_combination[2]] == state
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+fn is_draw(cells: &Vec<CellState>) -> bool {
+    !cells.iter().any(|element| *element == CellState::Empty)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use test_case::test_case;
+
+    #[test_case(vec![CellState::Filled(Player::X), CellState::Filled(Player::O)], true)]
+    #[test_case(vec![CellState::Filled(Player::X), CellState::Empty], false)]
+    fn test_is_draw(input: Vec<CellState>, expected: bool) {
+        assert_eq!(is_draw(&input), expected);
+    }
+
+    #[test_case(vec![CellState::Filled(Player::X), CellState::Filled(Player::X), CellState::Filled(Player::X), CellState::Empty, CellState::Empty, CellState::Empty, CellState::Empty, CellState::Empty, CellState::Empty], Player::X, true)]
+    #[test_case(vec![CellState::Empty, CellState::Empty, CellState::Empty, CellState::Filled(Player::X), CellState::Filled(Player::X), CellState::Filled(Player::X), CellState::Empty, CellState::Empty, CellState::Empty], Player::X, true)]
+    #[test_case(vec![CellState::Empty, CellState::Empty, CellState::Empty, CellState::Empty, CellState::Empty, CellState::Empty, CellState::Filled(Player::X), CellState::Filled(Player::X), CellState::Filled(Player::X)], Player::X, true)]
+    #[test_case(vec![CellState::Filled(Player::X), CellState::Empty, CellState::Empty, CellState::Filled(Player::X), CellState::Empty, CellState::Empty, CellState::Filled(Player::X), CellState::Empty, CellState::Empty], Player::X, true)]
+    #[test_case(vec![CellState::Filled(Player::X), CellState::Filled(Player::O), CellState::Filled(Player::X), CellState::Empty, CellState::Empty, CellState::Empty, CellState::Empty, CellState::Empty, CellState::Empty], Player::X, false)]
+    fn test_is_winner(input: Vec<CellState>, player: Player, expected: bool) {
+        assert_eq!(is_winner(&input, player), expected);
+    }
+}
