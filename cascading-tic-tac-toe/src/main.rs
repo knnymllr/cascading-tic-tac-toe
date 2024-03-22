@@ -18,6 +18,7 @@ fn main() {
     app.add_plugins(DefaultPlugins.set(WindowPlugin {
         primary_window: Some(Window {
             window_level: bevy::window::WindowLevel::AlwaysOnTop,
+            title: "Tic Tac Toe!".to_string(),
             ..default()
         }),
         ..default()
