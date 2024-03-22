@@ -14,27 +14,28 @@ impl Plugin for BoardPlugin {
         app.init_resource::<UiTheme>()
             .add_event::<CellClickedEvent>()
             .add_systems(OnEnter(PlayingState::Local), setup_board)
-            .add_systems(
-                OnTransition {
-                    from: GameState::GameOngoing,
-                    to: GameState::Won(Player::X),
-                },
-                (board_cell_interaction_system, on_cell_clicked),
-            )
-            .add_systems(
-                OnTransition {
-                    from: GameState::GameOngoing,
-                    to: GameState::Won(Player::O),
-                },
-                (board_cell_interaction_system, on_cell_clicked),
-            )
-            .add_systems(
-                OnTransition {
-                    from: GameState::GameOngoing,
-                    to: GameState::Draw,
-                },
-                (board_cell_interaction_system, on_cell_clicked),
-            );
+            // .add_systems(
+            //     OnTransition {
+            //         from: GameState::GameOngoing,
+            //         to: GameState::Won(Player::X),
+            //     },
+            //     (board_cell_interaction_system, on_cell_clicked),
+            // )
+            // .add_systems(
+            //     OnTransition {
+            //         from: GameState::GameOngoing,
+            //         to: GameState::Won(Player::O),
+            //     },
+            //     (board_cell_interaction_system, on_cell_clicked),
+            // )
+            // .add_systems(
+            //     OnTransition {
+            //         from: GameState::GameOngoing,
+            //         to: GameState::Draw,
+            //     },
+            //     (board_cell_interaction_system, on_cell_clicked),
+            // )
+            .add_systems(Update, (board_cell_interaction_system, on_cell_clicked));
     }
 }
 
