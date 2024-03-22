@@ -98,7 +98,7 @@ fn reload_button_interactions(
             Interaction::Pressed => {
                 *color = theme.button;
                 game_state
-                    .set(PlayingState::NotPlaying)
+                    .set(Box::new(PlayingState::NotPlaying) as Box<dyn Reflect>)
                     .expect("Could not set game state.");
             }
             Interaction::Hovered => *color = theme.button_hovered,
@@ -118,18 +118,18 @@ fn reload_game(
         commands.entity(entity).despawn_recursive();
     }
     playing_state
-        .set(PlayingState::Local)
+        .set(Box::new(PlayingState::Local) as Box<dyn Reflect>)
         .expect("Could not set game state.");
 
     if game_state.get() != &GameState::GameOngoing {
         game_state
-            .set(GameState::GameOngoing)
+            .set(Box::new(GameState::GameOngoing) as Box<dyn Reflect>)
             .expect("Could not set game state.");
     }
 
     if player_turn.get() != &PlayerTurn::X {
         player_turn
-            .set(PlayerTurn::X)
+            .set(Box::new(PlayerTurn::X) as Box<dyn Reflect>)
             .expect("Could not set game state.");
     }
 }

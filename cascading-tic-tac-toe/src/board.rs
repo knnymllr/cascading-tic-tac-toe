@@ -119,7 +119,7 @@ fn update_player_turn(player_turn_state: &mut ResMut<State<PlayerTurn>>) {
         PlayerTurn::X => PlayerTurn::O,
         PlayerTurn::O => PlayerTurn::X,
     };
-    player_turn_state.set(next_state).unwrap()
+    player_turn_state.set(Box::new(next_state)).unwrap()
 }
 
 pub fn root(theme: &Res<UiTheme>) -> NodeBundle {
