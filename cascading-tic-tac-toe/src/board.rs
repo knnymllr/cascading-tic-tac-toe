@@ -4,22 +4,24 @@ use crate::{CellState, GameState, Player, PlayerTurn, PlayingState, TicTacToeCel
 
 pub struct BoardPlugin;
 
-impl Plugin for BoardPlugin {
-    fn build(&self, app: &mut App) {
-        app.init_resource::<UiTheme>()
-            .add_event::<CellClickedEvent>()
-            .add_systems(OnEnter(PlayingState::Local), setup_board)
-            .add_systems(Update(GameState::GameOngoing), (board_cell_interaction_system, on_cell_clicked));
-    }
-}
-
-
 #[derive(Event)]
 pub struct CellClickedEvent {
     entity: Entity,
 }
 
-#[derive(Resource)] // not here before
+impl Plugin for BoardPlugin {
+    fn build(&self, app: &mut App) {
+        app.init_resource::<UiTheme>()
+            .add_event::<CellClickedEvent>()
+            .add_systems(OnEnter(PlayingState::Local), setup_board)
+            .add_systems(
+                Update(GameState::GameOngoing),
+                (board_cell_interaction_system, on_cell_clicked),
+            );
+    }
+}
+
+#[derive(Resource)]
 pub struct UiTheme {
     pub root: BackgroundColor,
     pub border: BackgroundColor,
@@ -58,8 +60,7 @@ pub fn board_cell_interaction_system(
         }
 
         match *interaction {
-            // Interaction::Clicked => {
-            Interaction::Pressed => {
+            Interaction::Clicked => {
                 send_cell_clicked.send(CellClickedEvent { entity });
                 *color = theme.button;
             }
@@ -124,40 +125,28 @@ fn update_player_turn(player_turn_state: &mut ResMut<State<PlayerTurn>>) {
 pub fn root(theme: &Res<UiTheme>) -> NodeBundle {
     NodeBundle {
         style: Style {
-            size: Size::new(Val::Percent(100.0), Val::Percent(100.0)),
+            width: Sized::new(Val::Percent(100.0)),
+            height: Sized::new(Val::Percent(100.0)),
             flex_direction: FlexDirection::ColumnReverse,
             justify_content: JustifyContent::Center,
             align_items: AlignItems::Center,
             ..Default::default()
         },
-        color: theme.root.clone(),
+        background_color: theme.root.clone(),
         ..Default::default()
     }
 }
 
-pub fn root(theme: Res<UiTheme>) -> NodeBundle {
-    NodeBundle {
-      style: Style {
-        size: Size::new(Val::Percent(100.0), Val::Percent(100.0)),
-        flex_direction: FlexDirection::ColumnReverse,
-        justify_content: JustifyContent::Center,
-        align_items: AlignItems::Center,
-        ..Default::default()
-      },
-      color: theme.root, // No need to clone here
-      ..Default::default()
-    }
-  }
-
 pub fn main_border(theme: &Res<UiTheme>) -> NodeBundle {
     NodeBundle {
         style: Style {
-            size: Size::new(Val::Auto, Val::Auto),
+            width: Sized::new(Val::Auto),
+            height: Sized::new(Val::Auto),
             border: Rect::all(Val::Px(2.0)),
             flex_direction: FlexDirection::ColumnReverse,
             ..Default::default()
         },
-        color: theme.border.clone(),
+        background_color: theme.border.clone(),
         ..Default::default()
     }
 }
@@ -165,7 +154,8 @@ pub fn main_border(theme: &Res<UiTheme>) -> NodeBundle {
 pub fn square_row() -> NodeBundle {
     NodeBundle {
         style: Style {
-            size: Size::new(Val::Auto, Val::Auto),
+            width: Sized::new(Val::Auto),
+            height: Sized::new(Val::Auto),
             ..Default::default()
         },
         ..Default::default()
@@ -175,11 +165,12 @@ pub fn square_row() -> NodeBundle {
 pub fn square_border(theme: &Res<UiTheme>) -> NodeBundle {
     NodeBundle {
         style: Style {
-            size: Size::new(Val::Px(50.0), Val::Px(50.0)),
+            width: Sized::new(Val::Px(50.0)),
+            height: Sized::new(Val::Px(50.0)),
             border: Rect::all(Val::Px(2.0)),
             ..Default::default()
         },
-        color: theme.border.clone(),
+        background_color: theme.border.clone(),
         ..Default::default()
     }
 }
@@ -187,14 +178,15 @@ pub fn square_border(theme: &Res<UiTheme>) -> NodeBundle {
 pub fn menu_background(theme: &Res<UiTheme>) -> NodeBundle {
     NodeBundle {
         style: Style {
-            size: Size::new(Val::Percent(100.0), Val::Percent(100.0)),
+            width: Sized::new(Val::Percent(100.0)),
+            height: Sized::new(Val::Percent(100.0)),
             align_items: AlignItems::Center,
             justify_content: JustifyContent::Center,
             flex_direction: FlexDirection::ColumnReverse,
             padding: Rect::all(Val::Px(5.0)),
             ..Default::default()
         },
-        color: theme.menu.clone(),
+        background_color: theme.menu.clone(),
         ..Default::default()
     }
 }
@@ -202,12 +194,13 @@ pub fn menu_background(theme: &Res<UiTheme>) -> NodeBundle {
 pub fn button(theme: &Res<UiTheme>) -> ButtonBundle {
     ButtonBundle {
         style: Style {
-            size: Size::new(Val::Percent(100.0), Val::Percent(100.0)),
+            width: Sized::new(Val::Percent(100.0)),
+            height: Sized::new(Val::Percent(100.0)),
             justify_content: JustifyContent::Center,
             align_items: AlignItems::Center,
             ..Default::default()
         },
-        color: theme.button.clone(),
+        background_color: theme.button.clone(),
         ..Default::default()
     }
 }
@@ -232,7 +225,7 @@ pub fn button_text(
 }
 
 pub fn setup_board(mut commands: Commands, theme: Res<UiTheme>, asset_server: Res<AssetServer>) {
-    commands.spawn_bundle(UiCameraBundle::default());
+    commands.spawn_bundle(Camera2dBundle::default());
 
     commands.spawn_bundle(root(&theme)).with_children(|parent| {
         parent
