@@ -59,7 +59,8 @@ pub fn button(theme: &Res<UiTheme>) -> ButtonBundle {
             align_items: AlignItems::Center,
             ..Default::default()
         },
-        background_color: theme.button.clone(),
+        // background_color: theme.button.clone(),
+        background_color: theme.button,
         ..Default::default()
     }
 }
@@ -75,7 +76,8 @@ pub fn button_text(
             TextStyle {
                 font: asset_server.load("fonts/FiraMono-Medium.ttf"),
                 font_size: 20.0,
-                color: theme.button_text.clone(),
+                // color: theme.button_text.clone(),
+                color: theme.button_text,
             },
         ),
         ..Default::default()

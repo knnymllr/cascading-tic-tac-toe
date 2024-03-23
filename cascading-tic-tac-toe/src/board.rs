@@ -34,7 +34,7 @@ impl Plugin for BoardPlugin {
             //         to: GameState::Draw,
             //     },
             //     (board_cell_interaction_system, on_cell_clicked),
-            // )
+            // );
             .add_systems(Update, (board_cell_interaction_system, on_cell_clicked));
     }
 }
@@ -95,7 +95,8 @@ pub fn on_cell_clicked(
     player_turn_state: ResMut<State<PlayerTurn>>,
     player_turn_next_state: ResMut<NextState<PlayerTurn>>,
 ) {
-    let player_turn = player_turn_state.get().clone();
+    // let player_turn = player_turn_state.get().clone();
+    let player_turn = player_turn_state.get();
 
     let mut state = StateWrapper {
         current: player_turn_state.clone(),
@@ -156,7 +157,7 @@ pub fn root(theme: &Res<UiTheme>) -> NodeBundle {
             align_items: AlignItems::Center,
             ..Default::default()
         },
-        background_color: theme.root.clone(),
+        background_color: theme.root,
         ..Default::default()
     }
 }
@@ -170,7 +171,7 @@ pub fn main_border(theme: &Res<UiTheme>) -> NodeBundle {
             flex_direction: FlexDirection::ColumnReverse,
             ..Default::default()
         },
-        background_color: theme.border.clone(),
+        background_color: theme.border,
         ..Default::default()
     }
 }
@@ -194,7 +195,7 @@ pub fn square_border(theme: &Res<UiTheme>) -> NodeBundle {
             border: UiRect::all(Val::Px(2.0)),
             ..Default::default()
         },
-        background_color: theme.border.clone(),
+        background_color: theme.border,
         ..Default::default()
     }
 }
@@ -210,7 +211,7 @@ pub fn menu_background(theme: &Res<UiTheme>) -> NodeBundle {
             padding: UiRect::all(Val::Px(5.0)),
             ..Default::default()
         },
-        background_color: theme.menu.clone(),
+        background_color: theme.menu,
         ..Default::default()
     }
 }
@@ -224,7 +225,7 @@ pub fn button(theme: &Res<UiTheme>) -> ButtonBundle {
             align_items: AlignItems::Center,
             ..Default::default()
         },
-        background_color: theme.button.clone(),
+        background_color: theme.button,
         ..Default::default()
     }
 }
@@ -240,7 +241,8 @@ pub fn button_text(
             TextStyle {
                 font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                 font_size: 30.0,
-                color: theme.button_text.clone(),
+                // color: theme.button_text.clone(),
+                color: theme.button_text,
             },
         ),
         ..Default::default()
