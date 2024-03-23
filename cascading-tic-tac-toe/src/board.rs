@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{CellState, GameState, Player, PlayerTurn, PlayingState, TicTacToeCell};
+use crate::{CellState, GameState, Player, PlayerTurn, PlayingState, StateWrapper, TicTacToeCell};
 
 pub struct BoardPlugin;
 
@@ -92,9 +92,15 @@ pub fn on_cell_clicked(
     mut events: EventReader<CellClickedEvent>,
     mut cell_query: Query<(&mut TicTacToeCell, &Children)>,
     mut cell_text_query: Query<&mut Text>,
-    mut player_turn_state: ResMut<State<PlayerTurn>>,
+    player_turn_state: ResMut<State<PlayerTurn>>,
+    player_turn_next_state: ResMut<NextState<PlayerTurn>>,
 ) {
     let player_turn = player_turn_state.get().clone();
+
+    let mut state = StateWrapper {
+        current: player_turn_state.clone(),
+        next: player_turn_next_state,
+    };
 
     for event in events.read() {
         let (mut cell, children) = cell_query
@@ -103,7 +109,7 @@ pub fn on_cell_clicked(
 
         update_cell_state(&mut cell, &player_turn);
         update_cell_text(&mut cell_text_query, children, &player_turn);
-        update_player_turn(&mut player_turn_state);
+        update_player_turn(&mut state);
     }
 }
 
@@ -131,13 +137,13 @@ fn update_cell_text(
     }
 }
 
-fn update_player_turn(player_turn_state: &mut ResMut<State<PlayerTurn>>) {
-    let player_turn = player_turn_state.get().clone();
-    let next_state = match player_turn {
+fn update_player_turn(state: &mut StateWrapper<PlayerTurn>) {
+    // let player_turn = state.get().clone();
+    let next_state = match state.current {
         PlayerTurn::X => PlayerTurn::O,
         PlayerTurn::O => PlayerTurn::X,
     };
-    player_turn_state.set(Box::new(next_state)).unwrap()
+    state.next.set(next_state);
 }
 
 pub fn root(theme: &Res<UiTheme>) -> NodeBundle {
