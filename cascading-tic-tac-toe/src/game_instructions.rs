@@ -42,7 +42,6 @@ fn text(asset_server: &Res<AssetServer>, theme: &Res<UiTheme>, label: &str) -> T
             TextStyle {
                 font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                 font_size: 30.0,
-                // color: theme.button_text.clone(),
                 color: theme.button_text,
             },
         ),

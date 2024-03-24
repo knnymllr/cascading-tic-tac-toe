@@ -1,17 +1,18 @@
 use bevy::prelude::*;
 
-mod states;
 pub use states::*;
-mod components;
 pub use components::*;
-mod board;
-pub use board::*;
-mod winning_logic;
-pub use winning_logic::*;
-mod game_instructions;
 pub use game_instructions::*;
-mod new_game;
+pub use winning_logic::*;
 pub use new_game::*;
+pub use board::*;
+
+mod states;
+mod components;
+mod game_instructions;
+mod winning_logic;
+mod new_game;
+mod board;
 
 fn main() {
     let mut app = App::new();

@@ -3,6 +3,9 @@ This document details a continuous variant of tic-tac-toe where a tie between pl
 
 ![This is a mockup of Cascading Tic-Tac-Toe.](image.png)
 
+## Team Member
+Xu Jiang
+
 # How to run
 Provide here instructions on how to use your application.   
 - Download the latest binary from the Release section on the right on GitHub.  

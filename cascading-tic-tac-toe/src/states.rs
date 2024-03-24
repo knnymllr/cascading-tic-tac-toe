@@ -1,12 +1,12 @@
 use bevy::prelude::{Reflect, States};
 
-#[derive(Reflect, Debug, Clone, Eq, PartialEq, Hash, States)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash, States, Reflect)]
 pub enum Player {
     X,
     O,
 }
 
-#[derive(Reflect, Debug, Clone, Eq, PartialEq, Hash, States)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash, States, Reflect)]
 pub enum PlayerTurn {
     X,
     O,
@@ -19,14 +19,14 @@ pub enum CellState {
     Grid,
 }
 
-#[derive(Reflect, Debug, Clone, Eq, PartialEq, Hash, States)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash, States, Reflect)]
 pub enum GameState {
     Won(Player),
     Draw,
     GameOngoing,
 }
 
-#[derive(Reflect, Debug, Clone, Eq, PartialEq, Hash, States)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash, States, Reflect)]
 pub enum PlayingState {
     NotPlaying,
     Local,
