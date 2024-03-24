@@ -10,8 +10,7 @@ pub struct GameInstructionsPlugin;
 impl Plugin for GameInstructionsPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(OnEnter(PlayingState::Local), setup_instructions)
-           .add_systems(OnTransition{ from: PlayingState::NotPlaying, to: PlayingState::Local }, update_instruction_on_state_change)
-           .add_systems(OnTransition{ from: PlayingState::Local, to: PlayingState::NotPlaying }, update_instruction_on_state_change);
+           .add_systems(Update, update_instruction_on_state_change.run_if(in_state(PlayingState::Local)));
     }
 }
 
@@ -20,7 +19,7 @@ fn root() -> NodeBundle {
         style: Style {
             position_type: PositionType::Absolute,
             width: Val::Percent(100.0),
-            height: Val::Percent(100.0),
+            height: Val::Percent(7.0),
             justify_content: JustifyContent::Center,
             align_items: AlignItems::FlexEnd,
             padding: UiRect {
@@ -65,9 +64,9 @@ fn update_instruction_on_state_change(
     mut instructions: Query<&mut Text, With<InstructionText>>,
 ) {
     if player_turn_state.is_changed() {
-        let next_text = match player_turn_state.get() {
-            &PlayerTurn::X => "Player's turn: X",
-            _ => "Player's turn: O",
+        let next_text = match player_turn_state.clone() {
+            PlayerTurn::X => "Player's turn: X",
+            PlayerTurn::O => "Player's turn: O",
         };
         let mut ui_text = instructions.single_mut();
         ui_text.sections[0].value = next_text.to_string();

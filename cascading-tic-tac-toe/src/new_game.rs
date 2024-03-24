@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{GameState, PlayerTurn, PlayingState, UiTheme};
+use crate::{GameState, PlayerTurn, PlayingState, StateWrapper, UiTheme};
 
 #[derive(Component)]
 struct ReloadButton;
@@ -10,21 +10,8 @@ pub struct NewGamePlugin;
 impl Plugin for NewGamePlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(OnEnter(PlayingState::Local), setup_restart_button)
-            .add_systems(
-                OnTransition {
-                    from: PlayingState::NotPlaying,
-                    to: PlayingState::Local,
-                },
-                reload_button_interactions,
-            )
-            .add_systems(
-                OnTransition {
-                    from: PlayingState::Local,
-                    to: PlayingState::NotPlaying,
-                },
-                reload_button_interactions,
-            )
-            .add_systems(OnEnter(PlayingState::NotPlaying), reload_game);
+           .add_systems(Update, reload_button_interactions)
+           .add_systems(OnEnter(PlayingState::NotPlaying), new_game);
     }
 }
 
@@ -33,7 +20,7 @@ fn root() -> NodeBundle {
         style: Style {
             position_type: PositionType::Absolute,
             width: Val::Percent(100.0),
-            height: Val::Percent(100.0),
+            height: Val::Percent(7.0),
             justify_content: JustifyContent::FlexEnd,
             align_items: AlignItems::FlexEnd,
             padding: UiRect {
@@ -105,15 +92,13 @@ fn reload_button_interactions(
         (&Interaction, &mut BackgroundColor),
         (Changed<Interaction>, With<Button>, With<ReloadButton>),
     >,
-    mut game_state: ResMut<State<PlayingState>>,
+    mut game_next_state: ResMut<NextState<PlayingState>>,
 ) {
     for (interaction, mut color) in buttons.iter_mut() {
         match *interaction {
             Interaction::Pressed => {
                 *color = theme.button;
-                game_state
-                    .set(Box::new(PlayingState::Local) as Box<dyn Reflect>)
-                    .expect("Could not set game state.");
+                game_next_state.set(PlayingState::NotPlaying)
             }
             Interaction::Hovered => *color = theme.button_hovered,
             Interaction::None => *color = theme.button,
@@ -121,29 +106,51 @@ fn reload_button_interactions(
     }
 }
 
+fn new_game(
+    commands: Commands,
+    query: Query<Entity>,
+    playing_state: ResMut<State<PlayingState>>,
+    playing_next_state: ResMut<NextState<PlayingState>>,
+    game_state: ResMut<State<GameState>>,
+    game_next_state: ResMut<NextState<GameState>>,
+    player_turn_state: ResMut<State<PlayerTurn>>,
+    player_turn_next_state: ResMut<NextState<PlayerTurn>>,
+) {
+    reload_game(
+        commands,
+        query,
+        StateWrapper {
+            current: playing_state.clone(),
+            next: playing_next_state,
+        },
+        StateWrapper {
+            current: game_state.clone(),
+            next: game_next_state,
+        },
+       StateWrapper {
+           current: player_turn_state.clone(),
+           next: player_turn_next_state,
+        }
+    );
+}
+
 fn reload_game(
     mut commands: Commands,
     query: Query<Entity>,
-    mut playing_state: ResMut<State<PlayingState>>,
-    mut game_state: ResMut<State<GameState>>,
-    mut player_turn: ResMut<State<PlayerTurn>>,
+    mut playing_state: StateWrapper<PlayingState>,
+    mut game_state: StateWrapper<GameState>,
+    mut player_turn_state: StateWrapper<PlayerTurn>,
 ) {
     for entity in query.iter() {
         commands.entity(entity).despawn_recursive();
     }
-    playing_state
-        .set(Box::new(PlayingState::NotPlaying) as Box<dyn Reflect>)
-        .expect("Could not set game state.");
+    playing_state.next.set(PlayingState::Local);
 
-    if game_state.get() != &GameState::GameOngoing {
-        game_state
-            .set(Box::new(GameState::GameOngoing) as Box<dyn Reflect>)
-            .expect("Could not set game state.");
+    if game_state.current != GameState::GameOngoing {
+        game_state.next.set(GameState::GameOngoing);
     }
 
-    if player_turn.get() != &PlayerTurn::X {
-        player_turn
-            .set(Box::new(PlayerTurn::X) as Box<dyn Reflect>)
-            .expect("Could not set game state.");
+    if player_turn_state.current != PlayerTurn::X {
+        player_turn_state.next.set(PlayerTurn::X);
     }
 }

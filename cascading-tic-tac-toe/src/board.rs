@@ -12,30 +12,9 @@ pub struct CellClickedEvent {
 impl Plugin for BoardPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<UiTheme>()
-            .add_event::<CellClickedEvent>()
-            .add_systems(OnEnter(PlayingState::Local), setup_board)
-            // .add_systems(
-            //     OnTransition {
-            //         from: GameState::GameOngoing,
-            //         to: GameState::Won(Player::X),
-            //     },
-            //     (board_cell_interaction_system, on_cell_clicked),
-            // )
-            // .add_systems(
-            //     OnTransition {
-            //         from: GameState::GameOngoing,
-            //         to: GameState::Won(Player::O),
-            //     },
-            //     (board_cell_interaction_system, on_cell_clicked),
-            // )
-            // .add_systems(
-            //     OnTransition {
-            //         from: GameState::GameOngoing,
-            //         to: GameState::Draw,
-            //     },
-            //     (board_cell_interaction_system, on_cell_clicked),
-            // );
-            .add_systems(Update, (board_cell_interaction_system, on_cell_clicked));
+           .add_event::<CellClickedEvent>()
+           .add_systems(OnEnter(PlayingState::Local), setup_board)
+           .add_systems(Update, (board_cell_interaction_system, on_cell_clicked).run_if(in_state(GameState::GameOngoing)));
     }
 }
 
@@ -139,7 +118,6 @@ fn update_cell_text(
 }
 
 fn update_player_turn(state: &mut StateWrapper<PlayerTurn>) {
-    // let player_turn = state.get().clone();
     let next_state = match state.current {
         PlayerTurn::X => PlayerTurn::O,
         PlayerTurn::O => PlayerTurn::X,
