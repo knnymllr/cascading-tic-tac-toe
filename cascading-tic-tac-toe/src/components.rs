@@ -1,5 +1,6 @@
-use crate::CellState;
+use crate::{CellState};
 use bevy::ecs::component::Component;
+use bevy::prelude::{NextState, ResMut, States};
 
 #[derive(Component, Clone)]
 pub struct TicTacToeCell {
@@ -14,4 +15,12 @@ pub struct GridCell {
     // Third option: No target, no time, play til you want to quit
     pub position: (u32, u32),  
     pub cell: TicTacToeCell,
+}
+
+/// current: State
+/// next: ResMux<NextState>
+#[derive(Debug)]
+pub struct StateWrapper<'w, T: States> {
+    pub current: T,
+    pub next: ResMut<'w, NextState<T>>,
 }

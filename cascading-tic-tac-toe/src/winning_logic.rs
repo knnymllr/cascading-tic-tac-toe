@@ -20,15 +20,13 @@ pub struct WinningLogicPlugin;
 
 impl Plugin for WinningLogicPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(OnTransition{ from: GameState::GameOngoing, to: GameState::Won(Player::X) }, is_game_over)
-           .add_systems(OnTransition{ from: GameState::GameOngoing, to: GameState::Won(Player::O) }, is_game_over)
-           .add_systems(OnTransition{ from: GameState::GameOngoing, to: GameState::Draw }, is_game_over);
+        app.add_systems(Update, is_game_over.run_if(in_state(GameState::GameOngoing)));
     }
 }
 
 pub fn is_game_over(
     cells_query: Query<&TicTacToeCell>,
-    mut update_winner: ResMut<State<GameState>>,
+    mut update_winner: ResMut<NextState<GameState>>,
 ) {
     let mut cells = vec![CellState::Empty; 9];
     for cell in cells_query.iter() {
@@ -36,17 +34,13 @@ pub fn is_game_over(
     }
 
     if is_winner(&cells, Player::X) {
-        update_winner
-            .set(Box::new(GameState::Won(Player::X)) as Box<dyn Reflect>)
-            .expect("Cannot update winner state");
-    } else if is_winner(&cells, Player::O) {
-        update_winner
-            .set(Box::new(GameState::Won(Player::O)) as Box<dyn Reflect>)
-            .expect("Cannot update winner state");
-    } else if is_draw(&cells) {
-        update_winner
-            .set(Box::new(GameState::Draw) as Box<dyn Reflect>)
-            .expect("Cannot update winner state");
+        update_winner.set(GameState::Won(Player::X))
+    }
+    if is_winner(&cells, Player::O) {
+        update_winner.set(GameState::Won(Player::O))
+    }
+    if is_draw(&cells) {
+        update_winner.set(GameState::Draw)
     }
 }
 
