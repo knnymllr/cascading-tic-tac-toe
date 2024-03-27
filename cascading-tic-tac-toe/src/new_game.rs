@@ -15,6 +15,7 @@ impl Plugin for NewGamePlugin {
     }
 }
 
+// Define the root node for the UI button
 fn root() -> NodeBundle {
     NodeBundle {
         style: Style {
@@ -36,6 +37,7 @@ fn root() -> NodeBundle {
     }
 }
 
+// Define the button node for the UI
 pub fn button(theme: &Res<UiTheme>) -> ButtonBundle {
     ButtonBundle {
         style: Style {
@@ -46,12 +48,12 @@ pub fn button(theme: &Res<UiTheme>) -> ButtonBundle {
             align_items: AlignItems::Center,
             ..Default::default()
         },
-        // background_color: theme.button.clone(),
         background_color: theme.button,
         ..Default::default()
     }
 }
 
+// Define the text node for the button
 pub fn button_text(
     asset_server: &Res<AssetServer>,
     theme: &Res<UiTheme>,
@@ -63,7 +65,6 @@ pub fn button_text(
             TextStyle {
                 font: asset_server.load("fonts/FiraMono-Medium.ttf"),
                 font_size: 20.0,
-                // color: theme.button_text.clone(),
                 color: theme.button_text,
             },
         ),
@@ -71,6 +72,7 @@ pub fn button_text(
     };
 }
 
+// System to set up the restart button
 fn setup_restart_button(
     mut commands: Commands,
     theme: Res<UiTheme>,
@@ -86,6 +88,7 @@ fn setup_restart_button(
     });
 }
 
+// System to handle interactions with the reload button
 fn reload_button_interactions(
     theme: Res<UiTheme>,
     mut buttons: Query<
@@ -106,6 +109,7 @@ fn reload_button_interactions(
     }
 }
 
+// System to start a new game
 fn new_game(
     commands: Commands,
     query: Query<Entity>,
@@ -127,13 +131,14 @@ fn new_game(
             current: game_state.clone(),
             next: game_next_state,
         },
-       StateWrapper {
-           current: player_turn_state.clone(),
-           next: player_turn_next_state,
+        StateWrapper {
+            current: player_turn_state.clone(),
+            next: player_turn_next_state,
         }
     );
 }
 
+// Function to reload the game state
 fn reload_game(
     mut commands: Commands,
     query: Query<Entity>,

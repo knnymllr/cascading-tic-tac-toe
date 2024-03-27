@@ -4,6 +4,7 @@ use crate::{CellState, GameState, Player, PlayerTurn, PlayingState, StateWrapper
 
 pub struct BoardPlugin;
 
+/// Event triggered when a cell is clicked
 #[derive(Event)]
 pub struct CellClickedEvent {
     entity: Entity,
@@ -13,11 +14,21 @@ impl Plugin for BoardPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<UiTheme>()
            .add_event::<CellClickedEvent>()
-           .add_systems(OnEnter(PlayingState::Local), setup_board)
-           .add_systems(Update, (board_cell_interaction_system, on_cell_clicked).run_if(in_state(GameState::GameOngoing)));
+           .add_systems(
+               OnEnter(PlayingState::Local),
+               setup_board
+           )
+           .add_systems(
+               Update, 
+               (
+                   board_cell_interaction_system,
+                   on_cell_clicked
+               ).run_if(in_state(GameState::GameOngoing))
+           );
     }
 }
 
+/// Resource containing UI theme settings
 #[derive(Resource)]
 pub struct UiTheme {
     pub root: BackgroundColor,
@@ -43,6 +54,7 @@ impl FromWorld for UiTheme {
     }
 }
 
+/// System for handling board cell interaction
 pub fn board_cell_interaction_system(
     theme: Res<UiTheme>,
     mut send_cell_clicked: EventWriter<CellClickedEvent>,
@@ -67,6 +79,7 @@ pub fn board_cell_interaction_system(
     }
 }
 
+/// System for handling cell click events
 pub fn on_cell_clicked(
     mut events: EventReader<CellClickedEvent>,
     mut cell_query: Query<(&mut TicTacToeCell, &Children)>,
@@ -74,9 +87,6 @@ pub fn on_cell_clicked(
     player_turn_state: ResMut<State<PlayerTurn>>,
     player_turn_next_state: ResMut<NextState<PlayerTurn>>,
 ) {
-    // let player_turn = player_turn_state.get().clone();
-    let player_turn = player_turn_state.get();
-
     let mut state = StateWrapper {
         current: player_turn_state.clone(),
         next: player_turn_next_state,
@@ -87,12 +97,13 @@ pub fn on_cell_clicked(
             .get_mut(event.entity)
             .expect("on_cell_clicked: Cell not found.");
 
-        update_cell_state(&mut cell, &player_turn);
-        update_cell_text(&mut cell_text_query, children, &player_turn);
+        update_cell_state(&mut cell, &player_turn_state.get());
+        update_cell_text(&mut cell_text_query, children, &player_turn_state.get());
         update_player_turn(&mut state);
     }
 }
 
+/// Updates the state of the clicked cell based on the current player turn
 fn update_cell_state(cell: &mut Mut<TicTacToeCell>, player_turn: &PlayerTurn) {
     cell.state = match player_turn {
         PlayerTurn::X => CellState::Filled(Player::X),
@@ -100,6 +111,7 @@ fn update_cell_state(cell: &mut Mut<TicTacToeCell>, player_turn: &PlayerTurn) {
     };
 }
 
+/// Updates the text of the clicked cell based on the current player turn
 fn update_cell_text(
     cell_text_query: &mut Query<&mut Text>,
     children: &Children,
@@ -117,6 +129,7 @@ fn update_cell_text(
     }
 }
 
+/// Updates the player turn state to the next player
 fn update_player_turn(state: &mut StateWrapper<PlayerTurn>) {
     let next_state = match state.current {
         PlayerTurn::X => PlayerTurn::O,
@@ -125,6 +138,7 @@ fn update_player_turn(state: &mut StateWrapper<PlayerTurn>) {
     state.next.set(next_state);
 }
 
+/// Creates the root node for the UI
 pub fn root(theme: &Res<UiTheme>) -> NodeBundle {
     NodeBundle {
         style: Style {
@@ -141,23 +155,32 @@ pub fn root(theme: &Res<UiTheme>) -> NodeBundle {
 }
 
 pub fn main_border(theme: &Res<UiTheme>) -> NodeBundle {
+    // Define the style for the main border node
     NodeBundle {
         style: Style {
+            // Set the width to auto
             width: Val::Auto,
+            // Set the height to auto
             height: Val::Auto,
+            // Add a border with 2 pixels width
             border: UiRect::all(Val::Px(2.0)),
+            // Set the flex direction to column-reverse
             flex_direction: FlexDirection::ColumnReverse,
             ..Default::default()
         },
+        // Set the background color of the main border node to the border color defined in the theme
         background_color: theme.border,
         ..Default::default()
     }
 }
 
 pub fn square_row() -> NodeBundle {
+    // Define the style for a square row node
     NodeBundle {
         style: Style {
+            // Set the width to auto
             width: Val::Auto,
+            // Set the height to auto
             height: Val::Auto,
             ..Default::default()
         },
@@ -166,43 +189,62 @@ pub fn square_row() -> NodeBundle {
 }
 
 pub fn square_border(theme: &Res<UiTheme>) -> NodeBundle {
+    // Define the style for a square border node
     NodeBundle {
         style: Style {
+            // Set the width to 50 pixels
             width: Val::Px(50.0),
+            // Set the height to 50 pixels
             height: Val::Px(50.0),
+            // Add a border with 2 pixels width
             border: UiRect::all(Val::Px(2.0)),
             ..Default::default()
         },
+        // Set the background color of the square border node to the border color defined in the theme
         background_color: theme.border,
         ..Default::default()
     }
 }
 
 pub fn menu_background(theme: &Res<UiTheme>) -> NodeBundle {
+    // Define the style for the menu background node
     NodeBundle {
         style: Style {
+            // Set the width to 100% of the parent's width
             width: Val::Percent(100.0),
+            // Set the height to 100% of the parent's height
             height: Val::Percent(100.0),
+            // Align items to the center
             align_items: AlignItems::Center,
+            // Justify content to the center
             justify_content: JustifyContent::Center,
+            // Set the flex direction to column-reverse
             flex_direction: FlexDirection::ColumnReverse,
+            // Add padding of 5 pixels to all sides
             padding: UiRect::all(Val::Px(5.0)),
             ..Default::default()
         },
+        // Set the background color of the menu background node to the menu color defined in the theme
         background_color: theme.menu,
         ..Default::default()
     }
 }
 
 pub fn button(theme: &Res<UiTheme>) -> ButtonBundle {
+    // Define the button bundle with styles and properties
     ButtonBundle {
         style: Style {
+            // Set the width to 100% of the parent's width
             width: Val::Percent(100.0),
+            // Set the height to 100% of the parent's height
             height: Val::Percent(100.0),
+            // Justify content to the center
             justify_content: JustifyContent::Center,
+            // Align items to the center
             align_items: AlignItems::Center,
             ..Default::default()
         },
+        // Set the background color of the button to the button color defined in the theme
         background_color: theme.button,
         ..Default::default()
     }
@@ -213,43 +255,57 @@ pub fn button_text(
     theme: &Res<UiTheme>,
     label: &str,
 ) -> TextBundle {
-    return TextBundle {
+    // Define the text bundle with styles and properties
+    TextBundle {
         text: Text::from_section(
             label,
             TextStyle {
+                // Load the FiraSans-Bold font from the asset server
                 font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                // Set the font size to 30 pixels
                 font_size: 30.0,
-                // color: theme.button_text.clone(),
+                // Set the color of the text to the button text color defined in the theme
                 color: theme.button_text,
             },
         ),
         ..Default::default()
-    };
+    }
 }
 
 pub fn setup_board(mut commands: Commands, theme: Res<UiTheme>, asset_server: Res<AssetServer>) {
+    // Spawn the 2D camera bundle
     commands.spawn(Camera2dBundle::default());
 
+    // Spawn the root node with children
     commands.spawn(root(&theme)).with_children(|parent| {
+        // Spawn the main border node with children
         parent
             .spawn(main_border(&theme))
             .with_children(|parent| {
+                // Loop through rows
                 for row_index in 0..3 {
+                    // Spawn the square row node with children
                     parent.spawn(square_row()).with_children(|parent| {
+                        // Loop through columns
                         for column_index in 1..=3 {
+                            // Calculate the cell ID
                             let cell_id = 3 * row_index + column_index - 1;
+                            // Spawn the square border node with children
                             parent
                                 .spawn(square_border(&theme))
                                 .with_children(|parent| {
+                                    // Spawn the button node with children
                                     parent
                                         .spawn(button(&theme))
                                         .with_children(|parent| {
+                                            // Spawn the button text node
                                             parent.spawn(button_text(
                                                 &asset_server,
                                                 &theme,
                                                 "",
                                             ));
                                         })
+                                        // Insert the TicTacToeCell component
                                         .insert(TicTacToeCell {
                                             cell_id,
                                             state: CellState::Empty,
