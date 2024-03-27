@@ -9,11 +9,13 @@ pub struct GameInstructionsPlugin;
 
 impl Plugin for GameInstructionsPlugin {
     fn build(&self, app: &mut App) {
+        // Add systems for setting up instructions and updating them based on game state changes
         app.add_systems(OnEnter(PlayingState::Local), setup_instructions)
            .add_systems(Update, update_instruction_on_state_change.run_if(in_state(PlayingState::Local)));
     }
 }
 
+// Define the root node for the UI instruction text
 fn root() -> NodeBundle {
     NodeBundle {
         style: Style {
@@ -35,6 +37,7 @@ fn root() -> NodeBundle {
     }
 }
 
+// Function to create the text node for UI instruction
 fn text(asset_server: &Res<AssetServer>, theme: &Res<UiTheme>, label: &str) -> TextBundle {
     return TextBundle {
         text: Text::from_section(
@@ -49,19 +52,22 @@ fn text(asset_server: &Res<AssetServer>, theme: &Res<UiTheme>, label: &str) -> T
     };
 }
 
+// System to set up the game instructions
 fn setup_instructions(mut commands: Commands, theme: Res<UiTheme>, asset_server: Res<AssetServer>) {
     commands.spawn(root()).with_children(|parent| {
         parent
-            .spawn(text(&asset_server, &theme, "Test"))
-            .insert(InstructionText);
+            .spawn(text(&asset_server, &theme, "Test")) // Spawn text node for instruction
+            .insert(InstructionText); // Add InstructionText component to the text node entity
     });
 }
 
+// System to update the game instructions based on state changes
 fn update_instruction_on_state_change(
     player_turn_state: Res<State<PlayerTurn>>,
     game_state: Res<State<GameState>>,
     mut instructions: Query<&mut Text, With<InstructionText>>,
 ) {
+    // If player turn changes, update instruction text accordingly
     if player_turn_state.is_changed() {
         let next_text = match player_turn_state.clone() {
             PlayerTurn::X => "Player's turn: X",
@@ -71,6 +77,7 @@ fn update_instruction_on_state_change(
         ui_text.sections[0].value = next_text.to_string();
     }
 
+    // If game state changes, update instruction text accordingly
     if game_state.is_changed() {
         let mut ui_text = instructions.single_mut();
 
