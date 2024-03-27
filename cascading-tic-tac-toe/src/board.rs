@@ -36,7 +36,7 @@ impl FromWorld for UiTheme {
             border: Color::rgb(0.65, 0.65, 0.65).into(),
             menu: Color::rgb(0.15, 0.15, 0.15).into(),
             button: Color::rgb(0.15, 0.15, 0.15).into(),
-            button_hovered: Color::rgb(0.35, 0.75, 0.35).into(),
+            button_hovered: Color::rgb(0.75, 0.35, 0.0).into(),
             button_pressed: Color::rgb(0.35, 0.75, 0.35).into(),
             button_text: Color::WHITE,
         }
