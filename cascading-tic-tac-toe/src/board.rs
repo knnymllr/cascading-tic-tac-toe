@@ -273,9 +273,6 @@ pub fn button_text(
 }
 
 pub fn setup_board(mut commands: Commands, theme: Res<UiTheme>, asset_server: Res<AssetServer>) {
-    // Spawn the 2D camera bundle
-    commands.spawn(Camera2dBundle::default());
-
     // Spawn the root node with children
     commands.spawn(root(&theme)).with_children(|parent| {
         // Spawn the main border node with children

@@ -1,4 +1,4 @@
-use bevy::prelude::{Reflect, States};
+use bevy::{prelude::{default, Reflect, States}, scene::ron::de};
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash, States, Reflect)]
 pub enum Player {
@@ -26,8 +26,21 @@ pub enum GameState {
     GameOngoing,    // Represents the game state when the game is still ongoing.
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash, States, Reflect)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash, States, Reflect, Default)]
 pub enum PlayingState {
-    NotPlaying,     // Represents the state when no game is being played.
-    Local,          // Represents the state when playing locally (not networked).
+    #[default]
+    Waiting,
+    NotPlaying,
+    Local,
+}
+
+// State used for the start menu screen
+#[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
+pub enum MenuState {
+    #[default]
+    Main,
+    Settings,
+    SettingsDisplay,
+    SettingsSound,
+    Disabled,
 }
