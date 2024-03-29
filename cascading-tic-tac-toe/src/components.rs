@@ -24,3 +24,17 @@ pub struct StateWrapper<'w, T: States> {
     pub current: T,
     pub next: ResMut<'w, NextState<T>>,
 }
+
+
+// Tag component used to tag entities added on the display settings menu screen
+#[derive(Component)]
+struct OnDisplaySettingsMenuScreen;
+
+// Tag component used to tag entities added on the sound settings menu screen
+#[derive(Component)]
+struct OnSoundSettingsMenuScreen;
+
+// Tag component used to mark which setting is currently selected
+#[derive(Component)]
+struct SelectedOption;
+

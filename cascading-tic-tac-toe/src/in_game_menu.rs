@@ -80,7 +80,7 @@ fn setup_restart_button(
         parent
             .spawn(button(&theme))
             .with_children(|parent| {
-                parent.spawn(button_text(&asset_server, &theme, "New Game"));
+                parent.spawn(button_text(&asset_server, &theme, "Restart"));
             })
             .insert(ReloadButton);
     });

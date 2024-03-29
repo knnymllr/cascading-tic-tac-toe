@@ -228,7 +228,6 @@ pub fn button_text(
 }
 
 pub fn setup_board(mut commands: Commands, theme: Res<UiTheme>, asset_server: Res<AssetServer>) {
-    commands.spawn(Camera2dBundle::default());
 
     commands.spawn(root(&theme)).with_children(|parent| {
         parent
