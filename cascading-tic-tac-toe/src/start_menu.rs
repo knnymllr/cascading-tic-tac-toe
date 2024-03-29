@@ -1,5 +1,5 @@
 use bevy::{app::AppExit, prelude::*};
-use crate::{MenuState,PlayingState};
+use crate::{MainCamera, MenuState, PlayingState};
 
 //colors
 const TEXT_COLOR: Color = Color::rgb(0.9, 0.9, 0.9);
@@ -7,6 +7,9 @@ const NORMAL_BUTTON: Color = Color::rgb(0.15, 0.15, 0.15);
 const HOVERED_BUTTON: Color = Color::rgb(0.25, 0.25, 0.25);
 const HOVERED_PRESSED_BUTTON: Color = Color::rgb(0.25, 0.65, 0.25);
 const PRESSED_BUTTON: Color = Color::rgb(0.35, 0.75, 0.35);
+
+#[derive(Component)]
+struct MyCamera;
 
 // Tag component used to tag entities added on the main menu screen
 #[derive(Component)]
@@ -44,8 +47,16 @@ impl Plugin for MenuPlugin{
             );
     }
 }
-fn main_menu_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    commands.spawn(Camera2dBundle::default());
+fn main_menu_setup(
+    mut cam: ResMut<MainCamera>,
+    mut commands: Commands,
+    asset_server: Res<AssetServer>
+) {
+
+    if !cam.id.is_some() {
+        cam.id = Option::from(commands.spawn((Camera2dBundle::default(), MyCamera)).id());
+    }
+
     // Common style for all buttons on the screen
     let button_style = Style {
         width: Val::Px(250.0),
@@ -240,7 +251,7 @@ fn menu_action(
 }
 
 // Generic system that takes a component as a parameter, and will despawn all entities with that component
-fn despawn_screen<T: Component>(to_despawn: Query<Entity, With<T>>, mut commands: Commands) {
+pub fn despawn_screen<T: Component>(to_despawn: Query<Entity, With<T>>, mut commands: Commands) {
     for entity in &to_despawn {
         commands.entity(entity).despawn_recursive();
     }

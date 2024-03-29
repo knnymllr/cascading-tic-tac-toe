@@ -1,6 +1,6 @@
 use crate::CellState;
 use bevy::ecs::component::Component;
-use bevy::prelude::{NextState, ResMut, States};
+use bevy::prelude::{Entity, NextState, ResMut, Resource, States};
 
 /// Represents a single cell in the Tic-Tac-Toe grid
 #[derive(Component, Clone)]
@@ -38,4 +38,10 @@ struct OnSoundSettingsMenuScreen;
 // Tag component used to mark which setting is currently selected
 #[derive(Component)]
 struct SelectedOption;
+
+// Tag component used to mark which setting is currently selected
+#[derive(Resource)]
+pub struct MainCamera {
+    pub id: Option<Entity>
+}
 
