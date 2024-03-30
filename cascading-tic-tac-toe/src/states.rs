@@ -1,4 +1,4 @@
-use bevy::{prelude::{default, Reflect, States}, scene::ron::de};
+use bevy::prelude::{Reflect, States};
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash, States, Reflect)]
 pub enum Player {
@@ -14,9 +14,9 @@ pub enum PlayerTurn {
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash, States)]
 pub enum CellState {
-    Empty,
+    Valid,
     Filled(Player),
-    Grid,
+    Invalid,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash, States, Reflect)]

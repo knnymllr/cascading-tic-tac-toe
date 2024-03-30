@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{CellState, GameState, Player, TicTacToeCell};
+use crate::{CellState, GameState, Player, GridCell};
 
 const WINNING_COMBINATIONS: [[usize; 3]; 8] = [
     // horizontal
@@ -28,11 +28,11 @@ impl Plugin for WinningLogicPlugin {
 
 /// System for checking if the game is over
 pub fn is_game_over(
-    cells_query: Query<&TicTacToeCell>,
+    cells_query: Query<&GridCell>,
     mut update_winner: ResMut<NextState<GameState>>,
 ) {
     // Collect the states of all cells into a vector
-    let mut cells = vec![CellState::Empty; 9];
+    let mut cells = vec![CellState::Valid; 9];
     for cell in cells_query.iter() {
         cells[cell.cell_id as usize] = cell.state.clone();
     }
@@ -70,8 +70,8 @@ fn is_winner(cells: &Vec<CellState>, player: Player) -> bool {
 
 /// Check if the game is a draw
 fn is_draw(cells: &Vec<CellState>) -> bool {
-    // If there are no empty cells left, the game is a draw
-    !cells.iter().any(|element| *element == CellState::Empty)
+    // If there are no Valid cells left, the game is a draw
+    !cells.iter().any(|element| *element == CellState::Valid)
 }
 
 /// Unit tests for the winning logic functions
@@ -82,17 +82,17 @@ mod tests {
 
     /// Test cases for the `is_draw` function
     #[test_case(vec![CellState::Filled(Player::X), CellState::Filled(Player::O)], true)]
-    #[test_case(vec![CellState::Filled(Player::X), CellState::Empty], false)]
+    #[test_case(vec![CellState::Filled(Player::X), CellState::Valid], false)]
     fn test_is_draw(input: Vec<CellState>, expected: bool) {
         assert_eq!(is_draw(&input), expected);
     }
 
     /// Test cases for the `is_winner` function
-    #[test_case(vec![CellState::Filled(Player::X), CellState::Filled(Player::X), CellState::Filled(Player::X), CellState::Empty, CellState::Empty, CellState::Empty, CellState::Empty, CellState::Empty, CellState::Empty], Player::X, true)]
-    #[test_case(vec![CellState::Empty, CellState::Empty, CellState::Empty, CellState::Filled(Player::X), CellState::Filled(Player::X), CellState::Filled(Player::X), CellState::Empty, CellState::Empty, CellState::Empty], Player::X, true)]
-    #[test_case(vec![CellState::Empty, CellState::Empty, CellState::Empty, CellState::Empty, CellState::Empty, CellState::Empty, CellState::Filled(Player::X), CellState::Filled(Player::X), CellState::Filled(Player::X)], Player::X, true)]
-    #[test_case(vec![CellState::Filled(Player::X), CellState::Empty, CellState::Empty, CellState::Filled(Player::X), CellState::Empty, CellState::Empty, CellState::Filled(Player::X), CellState::Empty, CellState::Empty], Player::X, true)]
-    #[test_case(vec![CellState::Filled(Player::X), CellState::Filled(Player::O), CellState::Filled(Player::X), CellState::Empty, CellState::Empty, CellState::Empty, CellState::Empty, CellState::Empty, CellState::Empty], Player::X, false)]
+    #[test_case(vec![CellState::Filled(Player::X), CellState::Filled(Player::X), CellState::Filled(Player::X), CellState::Valid, CellState::Valid, CellState::Valid, CellState::Valid, CellState::Valid, CellState::Valid], Player::X, true)]
+    #[test_case(vec![CellState::Valid, CellState::Valid, CellState::Valid, CellState::Filled(Player::X), CellState::Filled(Player::X), CellState::Filled(Player::X), CellState::Valid, CellState::Valid, CellState::Valid], Player::X, true)]
+    #[test_case(vec![CellState::Valid, CellState::Valid, CellState::Valid, CellState::Valid, CellState::Valid, CellState::Valid, CellState::Filled(Player::X), CellState::Filled(Player::X), CellState::Filled(Player::X)], Player::X, true)]
+    #[test_case(vec![CellState::Filled(Player::X), CellState::Valid, CellState::Valid, CellState::Filled(Player::X), CellState::Valid, CellState::Valid, CellState::Filled(Player::X), CellState::Valid, CellState::Valid], Player::X, true)]
+    #[test_case(vec![CellState::Filled(Player::X), CellState::Filled(Player::O), CellState::Filled(Player::X), CellState::Valid, CellState::Valid, CellState::Valid, CellState::Valid, CellState::Valid, CellState::Valid], Player::X, false)]
     fn test_is_winner(input: Vec<CellState>, player: Player, expected: bool) {
         assert_eq!(is_winner(&input, player), expected);
     }

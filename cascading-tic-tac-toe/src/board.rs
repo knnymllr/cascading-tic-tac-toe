@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{CellState, GameState, Player, PlayerTurn, PlayingState, StateWrapper, TicTacToeCell};
+use crate::{CellState, GameState, Player, PlayerTurn, PlayingState, StateWrapper, GridCell};
 
 pub struct BoardPlugin;
 
@@ -47,7 +47,7 @@ impl FromWorld for UiTheme {
             border: Color::rgb(0.65, 0.65, 0.65).into(),
             menu: Color::rgb(0.15, 0.15, 0.15).into(),
             button: Color::rgb(0.15, 0.15, 0.15).into(),
-            button_hovered: Color::rgb(0.75, 0.35, 0.0).into(),
+            button_hovered: Color::rgb(0.35, 0.75, 0.35).into(),
             button_pressed: Color::rgb(0.35, 0.75, 0.35).into(),
             button_text: Color::WHITE,
         }
@@ -59,12 +59,12 @@ pub fn board_cell_interaction_system(
     theme: Res<UiTheme>,
     mut send_cell_clicked: EventWriter<CellClickedEvent>,
     mut buttons: Query<
-        (&Interaction, &mut BackgroundColor, &TicTacToeCell, Entity),
+        (&Interaction, &mut BackgroundColor, &GridCell, Entity),
         (Changed<Interaction>, With<Button>),
     >,
 ) {
     for (interaction, mut color, cell, entity) in buttons.iter_mut() {
-        if cell.state != CellState::Empty {
+        if cell.state != CellState::Valid {
             return;
         }
 
@@ -82,7 +82,7 @@ pub fn board_cell_interaction_system(
 /// System for handling cell click events
 pub fn on_cell_clicked(
     mut events: EventReader<CellClickedEvent>,
-    mut cell_query: Query<(&mut TicTacToeCell, &Children)>,
+    mut cell_query: Query<(&mut GridCell, &Children)>,
     mut cell_text_query: Query<&mut Text>,
     player_turn_state: ResMut<State<PlayerTurn>>,
     player_turn_next_state: ResMut<NextState<PlayerTurn>>,
@@ -104,7 +104,7 @@ pub fn on_cell_clicked(
 }
 
 /// Updates the state of the clicked cell based on the current player turn
-fn update_cell_state(cell: &mut Mut<TicTacToeCell>, player_turn: &PlayerTurn) {
+fn update_cell_state(cell: &mut Mut<GridCell>, player_turn: &PlayerTurn) {
     cell.state = match player_turn {
         PlayerTurn::X => CellState::Filled(Player::X),
         PlayerTurn::O => CellState::Filled(Player::O),
@@ -302,10 +302,11 @@ pub fn setup_board(mut commands: Commands, theme: Res<UiTheme>, asset_server: Re
                                                 "",
                                             ));
                                         })
-                                        // Insert the TicTacToeCell component
-                                        .insert(TicTacToeCell {
+                                        // Insert the GridCell component
+                                        .insert(GridCell {
                                             cell_id,
-                                            state: CellState::Empty,
+                                            // position,
+                                            state: CellState::Valid,
                                         });
                                 });
                         }
