@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{CellState, GameState, Player, PlayerTurn, PlayingState, StateWrapper, GridCell};
+use crate::{CellState, GameState, Player, PlayerTurn, PlayingState, StateWrapper, GridCell, RoundCount};
 
 pub struct BoardPlugin;
 
@@ -272,7 +272,8 @@ pub fn button_text(
     }
 }
 
-pub fn setup_board(mut commands: Commands, theme: Res<UiTheme>, asset_server: Res<AssetServer>) {
+pub fn setup_board(mut commands: Commands, theme: Res<UiTheme>, asset_server: Res<AssetServer>, round_count: Res<RoundCount>) {
+    let n = round_count.get_current();
     // Spawn the root node with children
     commands.spawn(root(&theme)).with_children(|parent| {
         // Spawn the main border node with children
@@ -280,13 +281,14 @@ pub fn setup_board(mut commands: Commands, theme: Res<UiTheme>, asset_server: Re
             .spawn(main_border(&theme))
             .with_children(|parent| {
                 // Loop through rows
-                for row_index in 0..3 {
+                for row_index in 0..2*n+3 {
                     // Spawn the square row node with children
                     parent.spawn(square_row()).with_children(|parent| {
                         // Loop through columns
-                        for column_index in 1..=3 {
+                        for column_index in 0..n+3 {
                             // Calculate the cell ID
-                            let cell_id = 3 * row_index + column_index - 1;
+                            let cell_id = 3 * row_index + (column_index+1) - 1;
+                            let position = (row_index, column_index);
                             // Spawn the square border node with children
                             parent
                                 .spawn(square_border(&theme))
@@ -305,7 +307,7 @@ pub fn setup_board(mut commands: Commands, theme: Res<UiTheme>, asset_server: Re
                                         // Insert the GridCell component
                                         .insert(GridCell {
                                             cell_id,
-                                            // position,
+                                            position,
                                             state: CellState::Valid,
                                         });
                                 });

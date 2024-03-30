@@ -3,8 +3,13 @@
 use bevy::prelude::*;
 
 #[derive(Resource)]
-struct GameProgress {
-    number_of_games: u32,
-    // TODO: mode: timer/target,
-    // TODO: versus_computer: bool,
+pub struct RoundCount(u32);
+
+impl RoundCount {
+    pub fn new(initial_value: u32) -> Self {
+        RoundCount(initial_value)
+    }
+    pub fn get_current(&self) -> u32 {
+        self.0
+    }
 }
