@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{CellState, GameState, Player, GridCell};
+use crate::{CellState, GameState, Player, GridCell, RoundCount};
 
 const WINNING_COMBINATIONS: [[usize; 3]; 8] = [
     // horizontal
@@ -30,9 +30,13 @@ impl Plugin for WinningLogicPlugin {
 pub fn is_game_over(
     cells_query: Query<&GridCell>,
     mut update_winner: ResMut<NextState<GameState>>,
+    // mut round_count: ResMut<RoundCount>,
+    round_count: ResMut<RoundCount>,
 ) {
     // Collect the states of all cells into a vector
-    let mut cells = vec![CellState::Valid; 9];
+    let n = round_count.get_current();
+    let grid_size = (2*n+3)*(n+3);
+    let mut cells = vec![CellState::Valid; grid_size.try_into().unwrap()];
     for cell in cells_query.iter() {
         cells[cell.cell_id as usize] = cell.state.clone();
     }

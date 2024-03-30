@@ -32,7 +32,7 @@ fn main() {
         ..default()
     }))
     .insert_resource(ClearColor(Color::rgb(0.04, 0.04, 0.04)))
-    .insert_resource(RoundCount::new(0))
+    .insert_resource(RoundCount::new(1))
     .insert_state(MenuState::Main)
     .insert_state(PlayingState::Waiting)
     .insert_state(PlayerTurn::X)
