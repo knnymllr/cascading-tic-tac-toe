@@ -1,5 +1,5 @@
 use bevy::{app::AppExit, prelude::*};
-use crate::{MainCamera, MenuState, PlayingState};
+use crate::{GameState, MainCamera, MenuState, PlayingState};
 
 //colors
 const TEXT_COLOR: Color = Color::rgb(0.9, 0.9, 0.9);
@@ -9,7 +9,7 @@ const HOVERED_PRESSED_BUTTON: Color = Color::rgb(0.25, 0.65, 0.25);
 const PRESSED_BUTTON: Color = Color::rgb(0.35, 0.75, 0.35);
 
 #[derive(Component)]
-struct MyCamera;
+struct Camera;
 
 // Tag component used to tag entities added on the main menu screen
 #[derive(Component)]
@@ -38,12 +38,12 @@ impl Plugin for MenuPlugin{
         app
             // Systems to handle the main menu screen
             .add_systems(OnEnter(MenuState::Main), main_menu_setup)
-            // Systems to despwan main menu
+            // Systems to despawn main menu
             .add_systems(OnExit(MenuState::Main), despawn_screen::<OnMainMenuScreen>)
             // Common systems to all screens that handles buttons behavior
             .add_systems(
                 Update,
-                (menu_action, button_system).run_if(in_state(PlayingState::Waiting)),
+                (menu_action, button_system).run_if(in_state(PlayingState::NotPlaying)),
             );
     }
 }
@@ -54,7 +54,7 @@ fn main_menu_setup(
 ) {
 
     if !cam.id.is_some() {
-        cam.id = Option::from(commands.spawn((Camera2dBundle::default(), MyCamera)).id());
+        cam.id = Option::from(commands.spawn((Camera2dBundle::default(), Camera)).id());
     }
 
     // Common style for all buttons on the screen
@@ -221,6 +221,7 @@ fn menu_action(
     mut app_exit_events: EventWriter<AppExit>,
     mut menu_state: ResMut<NextState<MenuState>>,
     mut playing_state: ResMut<NextState<PlayingState>>,
+    mut game_state: ResMut<NextState<GameState>>
 ) {
     for (interaction, menu_button_action) in &interaction_query {
         if *interaction == Interaction::Pressed {
@@ -229,6 +230,7 @@ fn menu_action(
                     app_exit_events.send(AppExit);
                 }
                 MenuButtonAction::Play => {
+                    game_state.set(GameState::GameOngoing);
                     playing_state.set(PlayingState::Local);
                     menu_state.set(MenuState::Disabled);
                 }

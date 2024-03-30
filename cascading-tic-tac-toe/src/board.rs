@@ -1,31 +1,11 @@
 use bevy::prelude::*;
 
-use crate::{CellState, GameState, Player, PlayerTurn, PlayingState, StateWrapper, TicTacToeCell};
-
-pub struct BoardPlugin;
+use crate::{CellState, GameScreenTag, GameState, Player, PlayerTurn, StateWrapper, TicTacToeCell};
 
 /// Event triggered when a cell is clicked
 #[derive(Event)]
 pub struct CellClickedEvent {
     entity: Entity,
-}
-
-impl Plugin for BoardPlugin {
-    fn build(&self, app: &mut App) {
-        app.init_resource::<UiTheme>()
-           .add_event::<CellClickedEvent>()
-           .add_systems(
-               OnEnter(PlayingState::Local),
-               setup_board
-           )
-           .add_systems(
-               Update, 
-               (
-                   board_cell_interaction_system,
-                   on_cell_clicked
-               ).run_if(in_state(GameState::GameOngoing))
-           );
-    }
 }
 
 /// Resource containing UI theme settings
@@ -62,9 +42,10 @@ pub fn board_cell_interaction_system(
         (&Interaction, &mut BackgroundColor, &TicTacToeCell, Entity),
         (Changed<Interaction>, With<Button>),
     >,
+    game_state: ResMut<State<GameState>>,
 ) {
     for (interaction, mut color, cell, entity) in buttons.iter_mut() {
-        if cell.state != CellState::Empty {
+        if cell.state != CellState::Empty || game_state.clone() != GameState::GameOngoing {
             return;
         }
 
@@ -274,7 +255,7 @@ pub fn button_text(
 
 pub fn setup_board(mut commands: Commands, theme: Res<UiTheme>, asset_server: Res<AssetServer>) {
     // Spawn the root node with children
-    commands.spawn(root(&theme)).with_children(|parent| {
+    commands.spawn((root(&theme), GameScreenTag)).with_children(|parent| {
         // Spawn the main border node with children
         parent
             .spawn(main_border(&theme))
