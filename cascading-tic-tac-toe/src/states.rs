@@ -29,7 +29,6 @@ pub enum GameState {
 #[derive(Debug, Clone, Eq, PartialEq, Hash, States, Reflect, Default)]
 pub enum PlayingState {
     #[default]
-    Waiting,
     NotPlaying,
     Local,
 }
