@@ -1,19 +1,9 @@
 use bevy::prelude::*;
 
-use crate::{GameState, Player, PlayerTurn, PlayingState, UiTheme};
+use crate::{GameScreenTag, GameState, Player, PlayerTurn, UiTheme};
 
 #[derive(Component)]
-struct InstructionText;
-
-pub struct GameInstructionsPlugin;
-
-impl Plugin for GameInstructionsPlugin {
-    fn build(&self, app: &mut App) {
-        // Add systems for setting up instructions and updating them based on game state changes
-        app.add_systems(OnEnter(PlayingState::Local), setup_instructions)
-           .add_systems(Update, update_instruction_on_state_change.run_if(in_state(PlayingState::Local)));
-    }
-}
+pub struct InstructionText;
 
 // Define the root node for the UI instruction text
 fn root() -> NodeBundle {
@@ -53,16 +43,16 @@ fn text(asset_server: &Res<AssetServer>, theme: &Res<UiTheme>, label: &str) -> T
 }
 
 // System to set up the game instructions
-fn setup_instructions(mut commands: Commands, theme: Res<UiTheme>, asset_server: Res<AssetServer>) {
+pub fn setup_instructions(mut commands: Commands, theme: Res<UiTheme>, asset_server: Res<AssetServer>) {
     commands.spawn(root()).with_children(|parent| {
         parent
-            .spawn(text(&asset_server, &theme, "Test")) // Spawn text node for instruction
+            .spawn((text(&asset_server, &theme, "Test"), GameScreenTag)) // Spawn text node for instruction
             .insert(InstructionText); // Add InstructionText component to the text node entity
     });
 }
 
 // System to update the game instructions based on state changes
-fn update_instruction_on_state_change(
+pub fn update_instruction_on_state_change(
     player_turn_state: Res<State<PlayerTurn>>,
     game_state: Res<State<GameState>>,
     mut instructions: Query<&mut Text, With<InstructionText>>,

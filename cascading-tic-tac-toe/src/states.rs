@@ -1,4 +1,4 @@
-use bevy::{prelude::{default, Reflect, States}, scene::ron::de};
+use bevy::prelude::{Reflect, States};
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash, States, Reflect)]
 pub enum Player {
@@ -29,7 +29,6 @@ pub enum GameState {
 #[derive(Debug, Clone, Eq, PartialEq, Hash, States, Reflect, Default)]
 pub enum PlayingState {
     #[default]
-    Waiting,
     NotPlaying,
     Local,
 }

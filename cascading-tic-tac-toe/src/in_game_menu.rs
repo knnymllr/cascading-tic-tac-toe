@@ -1,19 +1,9 @@
 use bevy::prelude::*;
 
-use crate::{GameState, PlayerTurn, PlayingState, StateWrapper, UiTheme};
+use crate::{GameScreenTag, MenuState, PlayingState, UiTheme};
 
 #[derive(Component)]
-struct ReloadButton;
-
-pub struct NewGamePlugin;
-
-impl Plugin for NewGamePlugin {
-    fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(PlayingState::Local), setup_restart_button)
-           .add_systems(Update, reload_button_interactions)
-           .add_systems(OnEnter(PlayingState::NotPlaying), new_game);
-    }
-}
+pub struct ReloadButton;
 
 // Define the root node for the UI button
 fn root() -> NodeBundle {
@@ -73,89 +63,40 @@ pub fn button_text(
 }
 
 // System to set up the restart button
-fn setup_restart_button(
+pub fn setup_menu_button(
     mut commands: Commands,
     theme: Res<UiTheme>,
     asset_server: Res<AssetServer>,
 ) {
-    commands.spawn(root()).with_children(|parent| {
+    commands.spawn((root(), GameScreenTag)).with_children(|parent| {
         parent
             .spawn(button(&theme))
             .with_children(|parent| {
-                parent.spawn(button_text(&asset_server, &theme, "Restart"));
+                parent.spawn(button_text(&asset_server, &theme, "Main Menu"));
             })
             .insert(ReloadButton);
     });
 }
 
 // System to handle interactions with the reload button
-fn reload_button_interactions(
+pub fn button_interactions(
     theme: Res<UiTheme>,
     mut buttons: Query<
         (&Interaction, &mut BackgroundColor),
         (Changed<Interaction>, With<Button>, With<ReloadButton>),
     >,
     mut game_next_state: ResMut<NextState<PlayingState>>,
+    mut next_menu_state: ResMut<NextState<MenuState>>
 ) {
     for (interaction, mut color) in buttons.iter_mut() {
         match *interaction {
             Interaction::Pressed => {
                 *color = theme.button;
-                game_next_state.set(PlayingState::NotPlaying)
+                next_menu_state.set(MenuState::Main);
+                game_next_state.set(PlayingState::NotPlaying);
             }
             Interaction::Hovered => *color = theme.button_hovered,
             Interaction::None => *color = theme.button,
         }
-    }
-}
-
-// System to start a new game
-fn new_game(
-    commands: Commands,
-    query: Query<Entity>,
-    playing_state: ResMut<State<PlayingState>>,
-    playing_next_state: ResMut<NextState<PlayingState>>,
-    game_state: ResMut<State<GameState>>,
-    game_next_state: ResMut<NextState<GameState>>,
-    player_turn_state: ResMut<State<PlayerTurn>>,
-    player_turn_next_state: ResMut<NextState<PlayerTurn>>,
-) {
-    reload_game(
-        commands,
-        query,
-        StateWrapper {
-            current: playing_state.clone(),
-            next: playing_next_state,
-        },
-        StateWrapper {
-            current: game_state.clone(),
-            next: game_next_state,
-        },
-        StateWrapper {
-            current: player_turn_state.clone(),
-            next: player_turn_next_state,
-        }
-    );
-}
-
-// Function to reload the game state
-fn reload_game(
-    mut commands: Commands,
-    query: Query<Entity>,
-    mut playing_state: StateWrapper<PlayingState>,
-    mut game_state: StateWrapper<GameState>,
-    mut player_turn_state: StateWrapper<PlayerTurn>,
-) {
-    for entity in query.iter() {
-        commands.entity(entity).despawn_recursive();
-    }
-    playing_state.next.set(PlayingState::Local);
-
-    if game_state.current != GameState::GameOngoing {
-        game_state.next.set(GameState::GameOngoing);
-    }
-
-    if player_turn_state.current != PlayerTurn::X {
-        player_turn_state.next.set(PlayerTurn::X);
     }
 }
