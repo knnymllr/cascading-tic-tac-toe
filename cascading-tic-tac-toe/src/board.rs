@@ -265,16 +265,13 @@ fn generate_invalid_cells(n: u32, list: &mut Vec<u32>) {
             y = current_n + 2;
 
             list.push(x * cols + y);
-            println!("2n {} {}: {}", x, y, x * cols + y);
         }
         for i in 0..current_n {
             x = (2 * current_n) + 1;
             y = i;
             list.push(x * cols + y);
-            println!("n1 {} {}: {}", x, y, x * cols + y);
             x = (2 * current_n) + 2;
             list.push(x * cols + y);
-            println!("n2 {} {}: {}", x, y, x * cols + y);
         }
     }
 }
