@@ -1,6 +1,8 @@
 use bevy::prelude::*;
 
-use crate::{CellState, GameScreenTag, GameState, Player, PlayerTurn, StateWrapper, GridCell, RoundCount};
+use crate::{
+    CellState, GameScreenTag, GameState, GridCell, Player, PlayerTurn, RoundCount, StateWrapper,
+};
 
 /// Event triggered when a cell is clicked
 #[derive(Event)]
@@ -48,7 +50,6 @@ pub fn board_cell_interaction_system(
         if cell.state != CellState::Valid || game_state.clone() != GameState::GameOngoing {
             return;
         }
-        println!("{}", cell.cell_id);
 
         match *interaction {
             Interaction::Pressed => {
@@ -254,38 +255,81 @@ pub fn button_text(
     }
 }
 
-pub fn setup_board(mut commands: Commands, theme: Res<UiTheme>, asset_server: Res<AssetServer>, round_count: Res<RoundCount>) {
+fn generate_invalid_cells(n: u32, list: &mut Vec<u32>) {
+    let cols = n + 3;
+    for current_n in 1..=n {
+        let mut x;
+        let mut y;
+        for i in 0..2 * current_n {
+            x = i;
+            y = current_n + 2;
+
+            list.push(x * cols + y);
+            println!("2n {} {}: {}", x, y, x * cols + y);
+        }
+        for i in 0..current_n {
+            x = (2 * current_n) + 1;
+            y = i;
+            list.push(x * cols + y);
+            println!("n1 {} {}: {}", x, y, x * cols + y);
+            x = (2 * current_n) + 2;
+            list.push(x * cols + y);
+            println!("n2 {} {}: {}", x, y, x * cols + y);
+        }
+    }
+}
+
+pub fn setup_board(
+    mut commands: Commands,
+    theme: Res<UiTheme>,
+    asset_server: Res<AssetServer>,
+    round_count: Res<RoundCount>,
+) {
     let n = round_count.get_current();
+    let mut invalid_cells = Vec::new();
+    generate_invalid_cells(n, &mut invalid_cells);
+
     // Spawn the root node with children
-    commands.spawn((root(&theme), GameScreenTag)).with_children(|parent| {
-        // Spawn the main border node with children
-        parent
-            .spawn(main_border(&theme))
-            .with_children(|parent| {
+    commands
+        .spawn((root(&theme), GameScreenTag))
+        .with_children(|parent| {
+            // Spawn the main border node with children
+            parent.spawn(main_border(&theme)).with_children(|parent| {
                 // Loop through rows
-                for row_index in (0..2*n+3).rev() {
+                for row_index in (0..2 * n + 3).rev() {
                     // Spawn the square row node with children
                     parent.spawn(square_row()).with_children(|parent| {
                         // Loop through columns
-                        for column_index in 0..n+3 {
+                        for column_index in 0..n + 3 {
                             // Calculate the cell ID
-                            let cell_id = (n+3) * row_index + (column_index+1) - 1;
+                            let cell_id = (n + 3) * row_index + (column_index + 1) - 1;
                             // println!("{} {} = {}", row_index, column_index, cell_id);
-                            
-                            // Spawn the square border node with children
-                            parent
-                                .spawn(square_border(&theme))
-                                .with_children(|parent| {
+
+                            if invalid_cells.contains(&cell_id) {
+                                // Spawn the square border node with children
+                                parent.spawn(square_border(&theme)).with_children(|parent| {
                                     // Spawn the button node with children
                                     parent
                                         .spawn(button(&theme))
                                         .with_children(|parent| {
                                             // Spawn the button text node
-                                            parent.spawn(button_text(
-                                                &asset_server,
-                                                &theme,
-                                                "",
-                                            ));
+                                            parent.spawn(button_text(&asset_server, &theme, "-"));
+                                        })
+                                        // Insert the GridCell component
+                                        .insert(GridCell {
+                                            cell_id,
+                                            state: CellState::Invalid,
+                                        });
+                                });
+                            } else {
+                                // Spawn the square border node with children
+                                parent.spawn(square_border(&theme)).with_children(|parent| {
+                                    // Spawn the button node with children
+                                    parent
+                                        .spawn(button(&theme))
+                                        .with_children(|parent| {
+                                            // Spawn the button text node
+                                            parent.spawn(button_text(&asset_server, &theme, ""));
                                         })
                                         // Insert the GridCell component
                                         .insert(GridCell {
@@ -293,9 +337,10 @@ pub fn setup_board(mut commands: Commands, theme: Res<UiTheme>, asset_server: Re
                                             state: CellState::Valid,
                                         });
                                 });
+                            }
                         }
                     });
                 }
             });
-    });
+        });
 }
