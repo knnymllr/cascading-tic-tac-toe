@@ -14,9 +14,9 @@ pub enum PlayerTurn {
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash, States)]
 pub enum CellState {
-    Empty,
+    Valid,
     Filled(Player),
-    Grid,
+    Invalid,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash, States, Reflect)]

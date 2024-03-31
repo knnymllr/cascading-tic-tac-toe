@@ -1,6 +1,8 @@
 use bevy::prelude::*;
 
-use crate::{CellState, GameScreenTag, GameState, Player, PlayerTurn, StateWrapper, TicTacToeCell};
+use crate::{
+    CellState, GameScreenTag, GameState, GridCell, Player, PlayerTurn, RoundCount, StateWrapper,
+};
 
 /// Event triggered when a cell is clicked
 #[derive(Event)]
@@ -27,7 +29,7 @@ impl FromWorld for UiTheme {
             border: Color::rgb(0.65, 0.65, 0.65).into(),
             menu: Color::rgb(0.15, 0.15, 0.15).into(),
             button: Color::rgb(0.15, 0.15, 0.15).into(),
-            button_hovered: Color::rgb(0.75, 0.35, 0.0).into(),
+            button_hovered: Color::rgb(0.35, 0.75, 0.35).into(),
             button_pressed: Color::rgb(0.35, 0.75, 0.35).into(),
             button_text: Color::WHITE,
         }
@@ -39,13 +41,13 @@ pub fn board_cell_interaction_system(
     theme: Res<UiTheme>,
     mut send_cell_clicked: EventWriter<CellClickedEvent>,
     mut buttons: Query<
-        (&Interaction, &mut BackgroundColor, &TicTacToeCell, Entity),
+        (&Interaction, &mut BackgroundColor, &GridCell, Entity),
         (Changed<Interaction>, With<Button>),
     >,
     game_state: ResMut<State<GameState>>,
 ) {
     for (interaction, mut color, cell, entity) in buttons.iter_mut() {
-        if cell.state != CellState::Empty || game_state.clone() != GameState::GameOngoing {
+        if cell.state != CellState::Valid || game_state.clone() != GameState::GameOngoing {
             return;
         }
 
@@ -63,7 +65,7 @@ pub fn board_cell_interaction_system(
 /// System for handling cell click events
 pub fn on_cell_clicked(
     mut events: EventReader<CellClickedEvent>,
-    mut cell_query: Query<(&mut TicTacToeCell, &Children)>,
+    mut cell_query: Query<(&mut GridCell, &Children)>,
     mut cell_text_query: Query<&mut Text>,
     player_turn_state: ResMut<State<PlayerTurn>>,
     player_turn_next_state: ResMut<NextState<PlayerTurn>>,
@@ -85,7 +87,7 @@ pub fn on_cell_clicked(
 }
 
 /// Updates the state of the clicked cell based on the current player turn
-fn update_cell_state(cell: &mut Mut<TicTacToeCell>, player_turn: &PlayerTurn) {
+fn update_cell_state(cell: &mut Mut<GridCell>, player_turn: &PlayerTurn) {
     cell.state = match player_turn {
         PlayerTurn::X => CellState::Filled(Player::X),
         PlayerTurn::O => CellState::Filled(Player::O),
@@ -253,45 +255,89 @@ pub fn button_text(
     }
 }
 
-pub fn setup_board(mut commands: Commands, theme: Res<UiTheme>, asset_server: Res<AssetServer>) {
+fn generate_invalid_cells(n: u32, list: &mut Vec<u32>) {
+    let cols = n + 3;
+    for current_n in 1..=n {
+        let mut x;
+        let mut y;
+        for i in 0..2 * current_n {
+            x = i;
+            y = current_n + 2;
+
+            list.push(x * cols + y);
+        }
+        for i in 0..current_n {
+            x = (2 * current_n) + 1;
+            y = i;
+            list.push(x * cols + y);
+            x = (2 * current_n) + 2;
+            list.push(x * cols + y);
+        }
+    }
+}
+
+pub fn setup_board(
+    mut commands: Commands,
+    theme: Res<UiTheme>,
+    asset_server: Res<AssetServer>,
+    round_count: Res<RoundCount>,
+) {
+    let n = round_count.get_current();
+    let mut invalid_cells = Vec::new();
+    generate_invalid_cells(n, &mut invalid_cells);
+
     // Spawn the root node with children
-    commands.spawn((root(&theme), GameScreenTag)).with_children(|parent| {
-        // Spawn the main border node with children
-        parent
-            .spawn(main_border(&theme))
-            .with_children(|parent| {
+    commands
+        .spawn((root(&theme), GameScreenTag))
+        .with_children(|parent| {
+            // Spawn the main border node with children
+            parent.spawn(main_border(&theme)).with_children(|parent| {
                 // Loop through rows
-                for row_index in 0..3 {
+                for row_index in (0..2 * n + 3).rev() {
                     // Spawn the square row node with children
                     parent.spawn(square_row()).with_children(|parent| {
                         // Loop through columns
-                        for column_index in 1..=3 {
+                        for column_index in 0..n + 3 {
                             // Calculate the cell ID
-                            let cell_id = 3 * row_index + column_index - 1;
-                            // Spawn the square border node with children
-                            parent
-                                .spawn(square_border(&theme))
-                                .with_children(|parent| {
+                            let cell_id = (n + 3) * row_index + (column_index + 1) - 1;
+                            // println!("{} {} = {}", row_index, column_index, cell_id);
+
+                            if invalid_cells.contains(&cell_id) {
+                                // Spawn the square border node with children
+                                parent.spawn(square_border(&theme)).with_children(|parent| {
                                     // Spawn the button node with children
                                     parent
                                         .spawn(button(&theme))
                                         .with_children(|parent| {
                                             // Spawn the button text node
-                                            parent.spawn(button_text(
-                                                &asset_server,
-                                                &theme,
-                                                "",
-                                            ));
+                                            parent.spawn(button_text(&asset_server, &theme, "-"));
                                         })
-                                        // Insert the TicTacToeCell component
-                                        .insert(TicTacToeCell {
+                                        // Insert the GridCell component
+                                        .insert(GridCell {
                                             cell_id,
-                                            state: CellState::Empty,
+                                            state: CellState::Invalid,
                                         });
                                 });
+                            } else {
+                                // Spawn the square border node with children
+                                parent.spawn(square_border(&theme)).with_children(|parent| {
+                                    // Spawn the button node with children
+                                    parent
+                                        .spawn(button(&theme))
+                                        .with_children(|parent| {
+                                            // Spawn the button text node
+                                            parent.spawn(button_text(&asset_server, &theme, ""));
+                                        })
+                                        // Insert the GridCell component
+                                        .insert(GridCell {
+                                            cell_id,
+                                            state: CellState::Valid,
+                                        });
+                                });
+                            }
                         }
                     });
                 }
             });
-    });
+        });
 }
