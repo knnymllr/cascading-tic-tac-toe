@@ -270,7 +270,8 @@ pub fn setup_board(mut commands: Commands, theme: Res<UiTheme>, asset_server: Re
                         for column_index in 0..n+3 {
                             // Calculate the cell ID
                             let cell_id = (n+3) * row_index + (column_index+1) - 1;
-                            println!("{} {} = {}", row_index, column_index, cell_id);
+                            // println!("{} {} = {}", row_index, column_index, cell_id);
+                            
                             // Spawn the square border node with children
                             parent
                                 .spawn(square_border(&theme))

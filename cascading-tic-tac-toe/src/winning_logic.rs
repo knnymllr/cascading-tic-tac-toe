@@ -84,18 +84,18 @@ fn generate_winning_combinations(round_count: u32, winners: &mut Vec<[(u32, u32)
         // diagonals
         winners.push([(2*n, n), (2*n+1, n+1), (2*n+2, n+2)]);
         winners.push([(2*n, n+2), (2*n+1, n+1), (2*n+2, n)]);
-        // if n > 0 {
-        //     // reach-back
-        //     winners.push([(2*n, n+2), (2*n-1, n), (2*n-2, n)]);
-        //     winners.push([(2*n, n), (2*n-1, n), (2*n-2, n-2)]);
-        //     winners.push([(2*n+1, n+1), (2*n, n), (2*n-1, n-1)]);
-        //     winners.push([(2*n+1, n+2), (2*n, n+1), (2*n-1, n)]);
-        // }
+        if n > 0 {
+            // reach-back
+            winners.push([(2*n-2, n), (2*n-1, n+1), (2*n, n+2)]);
+            winners.push([(2*n-1, n), (2*n, n+1), (2*n+1, n+2)]);
+            winners.push([(2*n-1, n-1), (2*n, n), (2*n+1, n+1)]);
+            winners.push([(2*n, n-1), (2*n+1, n), (2*n+2, n+1)]);
+        }
     }
 }
 
 fn get_index(x: u32, y: u32, num_cols: u32) -> usize {
-    let index = (y * num_cols) + x;
+    let index = (x * num_cols) + y;
     index as usize // Cast to usize if needed
 }
 
