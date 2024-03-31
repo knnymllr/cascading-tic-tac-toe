@@ -1,25 +1,6 @@
 use bevy::prelude::*;
 
 use crate::{CellState, GameState, GridCell, Player, RoundCount};
-
-const WINNING_COMBINATIONS: [[(u32, u32); 3]; 8] = [
-    // horizontal
-    [(0, 0), (0, 1), (0, 2)],
-    [(1, 0), (1, 1), (1, 2)],
-    [(2, 0), (2, 1), (2, 2)],
-    // vertical
-    [(0, 0), (1, 0), (2, 0)],
-    [(0, 1), (1, 1), (2, 1)],
-    [(0, 2), (1, 2), (2, 2)],
-    // diagonals
-    [(0, 0), (1, 1), (2, 2)],
-    [(2, 0), (1, 1), (0, 2)],
-    // reach-back
-    // [(0,), (3,), (6,)],
-    // [(1,), (4,), (7,)],
-    // [(2,), (5,), (8,)],
-    // [(2,), (5,), (8,)],
-];
 /// Plugin for handling winning logic in tic-tac-toe game
 pub struct WinningLogicPlugin;
 
@@ -66,8 +47,11 @@ pub fn is_game_over(
 /// Check if a player has won
 fn is_winner(cells: &Vec<CellState>, n: u32, player: Player) -> bool {
     let state = CellState::Filled(player);
+
+    let mut winning_combinations: Vec<[(u32, u32); 3]> = Vec::new();
+    generate_winning_combinations(n, &mut winning_combinations);
     // Iterate over all winning combinations
-    for winning_combination in WINNING_COMBINATIONS {
+    for winning_combination in winning_combinations {
         let mut all_match = true;
 
         for cell in winning_combination.iter() {
@@ -87,10 +71,33 @@ fn is_winner(cells: &Vec<CellState>, n: u32, player: Player) -> bool {
     return false;
 }
 
+fn generate_winning_combinations(round_count: u32, winners: &mut Vec<[(u32, u32); 3]>) {
+    for n in 0..=round_count {
+        // horizontal
+        winners.push([(2*n, n), (2*n, n+1), (2*n, n+2)]);
+        winners.push([(2*n+1, n), (2*n+1, n+1), (2*n+1, n+2)]);
+        winners.push([(2*n+2, n), (2*n+2, n+1), (2*n+2, n+2)]);
+        // vertical
+        winners.push([(2*n, n), (2*n+1, n), (2*n+2, n)]);
+        winners.push([(2*n, n+1), (2*n+1, n+1), (2*n+2, n+1)]);
+        winners.push([(2*n, n+2), (2*n+1, n+2), (2*n+2, n+2)]);
+        // diagonals
+        winners.push([(2*n, n), (2*n+1, n+1), (2*n+2, n+2)]);
+        winners.push([(2*n, n+2), (2*n+1, n+1), (2*n+2, n)]);
+        // if n > 0 {
+        //     // reach-back
+        //     winners.push([(2*n, n+2), (2*n-1, n), (2*n-2, n)]);
+        //     winners.push([(2*n, n), (2*n-1, n), (2*n-2, n-2)]);
+        //     winners.push([(2*n+1, n+1), (2*n, n), (2*n-1, n-1)]);
+        //     winners.push([(2*n+1, n+2), (2*n, n+1), (2*n-1, n)]);
+        // }
+    }
+}
+
 fn get_index(x: u32, y: u32, num_cols: u32) -> usize {
     let index = (y * num_cols) + x;
-    index as usize// Cast to usize if needed
-  }
+    index as usize // Cast to usize if needed
+}
 
 /// Check if the game is a draw
 ///! WILL BE REFACTORED

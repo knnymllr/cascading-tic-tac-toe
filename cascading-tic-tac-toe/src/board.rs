@@ -48,6 +48,7 @@ pub fn board_cell_interaction_system(
         if cell.state != CellState::Valid || game_state.clone() != GameState::GameOngoing {
             return;
         }
+        println!("{}", cell.cell_id);
 
         match *interaction {
             Interaction::Pressed => {
@@ -262,14 +263,14 @@ pub fn setup_board(mut commands: Commands, theme: Res<UiTheme>, asset_server: Re
             .spawn(main_border(&theme))
             .with_children(|parent| {
                 // Loop through rows
-                for row_index in 0..2*n+3 {
+                for row_index in (0..2*n+3).rev() {
                     // Spawn the square row node with children
                     parent.spawn(square_row()).with_children(|parent| {
                         // Loop through columns
                         for column_index in 0..n+3 {
                             // Calculate the cell ID
-                            let cell_id = 3 * row_index + (column_index+1) - 1;
-                            // let position = (row_index, column_index);
+                            let cell_id = (n+3) * row_index + (column_index+1) - 1;
+                            println!("{} {} = {}", row_index, column_index, cell_id);
                             // Spawn the square border node with children
                             parent
                                 .spawn(square_border(&theme))
@@ -283,13 +284,11 @@ pub fn setup_board(mut commands: Commands, theme: Res<UiTheme>, asset_server: Re
                                                 &asset_server,
                                                 &theme,
                                                 "",
-                                                // cell_id,
                                             ));
                                         })
                                         // Insert the GridCell component
                                         .insert(GridCell {
                                             cell_id,
-                                            // position,
                                             state: CellState::Valid,
                                         });
                                 });
