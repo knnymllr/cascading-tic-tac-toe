@@ -269,7 +269,7 @@ pub fn setup_board(mut commands: Commands, theme: Res<UiTheme>, asset_server: Re
                         for column_index in 0..n+3 {
                             // Calculate the cell ID
                             let cell_id = 3 * row_index + (column_index+1) - 1;
-                            let position = (row_index, column_index);
+                            // let position = (row_index, column_index);
                             // Spawn the square border node with children
                             parent
                                 .spawn(square_border(&theme))
@@ -283,12 +283,13 @@ pub fn setup_board(mut commands: Commands, theme: Res<UiTheme>, asset_server: Re
                                                 &asset_server,
                                                 &theme,
                                                 "",
+                                                // cell_id,
                                             ));
                                         })
                                         // Insert the GridCell component
                                         .insert(GridCell {
                                             cell_id,
-                                            position,
+                                            // position,
                                             state: CellState::Valid,
                                         });
                                 });
