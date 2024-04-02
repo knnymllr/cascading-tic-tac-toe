@@ -41,5 +41,13 @@ fn main() {
     .add_plugins(WinningLogicPlugin)
     .add_plugins(MenuPlugin)
     .add_plugins(GameScreen)
+    .add_systems(Startup, setup)
     .run();
+}
+
+fn setup(asset_server: Res<AssetServer>, mut commands: Commands) {
+    commands.spawn(AudioBundle {
+        source: asset_server.load("sounds/mammoth.ogg"),
+        ..default()
+    });
 }
