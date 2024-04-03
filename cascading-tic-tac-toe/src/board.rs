@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_kira_audio::prelude::*;
 
 use crate::{
     CellState, GameScreenTag, GameState, GridCell, Player, PlayerTurn, RoundCount, StateWrapper,
@@ -69,17 +70,22 @@ pub fn on_cell_clicked(
     mut cell_text_query: Query<&mut Text>,
     player_turn_state: ResMut<State<PlayerTurn>>,
     player_turn_next_state: ResMut<NextState<PlayerTurn>>,
+    asset_server: Res<AssetServer>,
+    audio: Res<Audio>,
 ) {
     let mut state = StateWrapper {
         current: player_turn_state.clone(),
         next: player_turn_next_state,
     };
 
+    let movement_sound = asset_server.load("sounds/Crush8-Bit.ogg");
+
     for event in events.read() {
         let (mut cell, children) = cell_query
             .get_mut(event.entity)
             .expect("on_cell_clicked: Cell not found.");
 
+        audio.play(movement_sound.clone());
         update_cell_state(&mut cell, &player_turn_state.get());
         update_cell_text(&mut cell_text_query, children, &player_turn_state.get());
         update_player_turn(&mut state);
