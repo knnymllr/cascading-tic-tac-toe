@@ -1,3 +1,4 @@
+use bevy_kira_audio::prelude::*;
 use bevy::prelude::*;
 
 pub use states::*;
@@ -30,6 +31,7 @@ fn main() {
         }),
         ..default()
     }))
+    .add_plugins(AudioPlugin)
     .init_resource::<UiTheme>()
     .insert_resource(ClearColor(Color::rgb(0.04, 0.04, 0.04)))
     .insert_resource::<MainCamera>(MainCamera{id:None})
@@ -41,13 +43,10 @@ fn main() {
     .add_plugins(WinningLogicPlugin)
     .add_plugins(MenuPlugin)
     .add_plugins(GameScreen)
-    .add_systems(Startup, setup)
+    .add_systems(Startup, start_background_audio)
     .run();
 }
 
-fn setup(asset_server: Res<AssetServer>, mut commands: Commands) {
-    commands.spawn(AudioBundle {
-        source: asset_server.load("sounds/mammoth.ogg"),
-        ..default()
-    });
+fn start_background_audio(asset_server: Res<AssetServer>, audio: Res<Audio>) {
+    audio.play(asset_server.load("sounds/mammoth.ogg")).looped();
 }
