@@ -40,14 +40,16 @@ impl FromWorld for UiTheme {
 /// System for handling board cell interaction
 pub fn board_cell_interaction_system(
     theme: Res<UiTheme>,
+    player_turn: ResMut<State<PlayerTurn>>,
     mut send_cell_clicked: EventWriter<CellClickedEvent>,
     mut buttons: Query<
-        (&Interaction, &mut BackgroundColor, &GridCell, Entity),
+        (&Interaction, &mut BackgroundColor, &GridCell, Entity, &Children),
         (Changed<Interaction>, With<Button>),
     >,
+    mut cell_text_query: Query<&mut Text>,
     game_state: ResMut<State<GameState>>,
 ) {
-    for (interaction, mut color, cell, entity) in buttons.iter_mut() {
+    for (interaction, mut color, cell, entity, children) in buttons.iter_mut() {
         if cell.state != CellState::Valid || game_state.clone() != GameState::GameOngoing {
             return;
         }
@@ -57,8 +59,28 @@ pub fn board_cell_interaction_system(
                 send_cell_clicked.send(CellClickedEvent { entity });
                 *color = theme.button;
             }
-            Interaction::Hovered => *color = theme.button_hovered,
-            Interaction::None => *color = theme.button,
+            Interaction::Hovered => {
+                *color = theme.button_hovered;
+                let text = match player_turn.clone() {
+                    PlayerTurn::X => "X",
+                    PlayerTurn::O => "O",
+                };
+
+                for child in children.iter() {
+                    if let Ok(mut cell_text) = cell_text_query.get_mut(*child) {
+                        cell_text.sections[0].value = text.to_string();
+                    }
+                }
+            },
+            Interaction::None => {
+                *color = theme.button;
+
+                for child in children.iter() {
+                    if let Ok(mut cell_text) = cell_text_query.get_mut(*child) {
+                        cell_text.sections[0].value = "".to_string();
+                    }
+                }
+            },
         }
     }
 }

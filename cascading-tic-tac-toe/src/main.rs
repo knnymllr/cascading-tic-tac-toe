@@ -27,6 +27,10 @@ mod board;
 mod start_menu;
 mod game_screen;
 
+mod utils {
+    pub mod modify_text;
+}
+
 fn main() {
 
     let mut app = App::new();
