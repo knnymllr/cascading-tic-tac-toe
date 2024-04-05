@@ -8,7 +8,7 @@ pub use game_instructions::*;
 pub use winning_logic::*;
 pub use in_game_menu::*;
 pub use board::*;
-pub use start_menu::*;
+pub use menu::*;
 pub use game_screen::*;
 
 mod states;
@@ -18,7 +18,7 @@ mod game_instructions;
 mod winning_logic;
 mod in_game_menu;
 mod board;
-mod start_menu;
+mod menu;
 mod game_screen;
 
 fn main() {

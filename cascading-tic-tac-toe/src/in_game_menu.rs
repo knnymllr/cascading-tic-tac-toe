@@ -28,7 +28,7 @@ fn root() -> NodeBundle {
 }
 
 // Define the button node for the UI
-pub fn button(theme: &Res<UiTheme>) -> ButtonBundle {
+pub fn button_game(theme: &Res<UiTheme>) -> ButtonBundle {
     ButtonBundle {
         style: Style {
             padding: UiRect::all(Val::Px(5.)),
@@ -44,7 +44,7 @@ pub fn button(theme: &Res<UiTheme>) -> ButtonBundle {
 }
 
 // Define the text node for the button
-pub fn button_text(
+pub fn button_text_game(
     asset_server: &Res<AssetServer>,
     theme: &Res<UiTheme>,
     label: &str,
@@ -70,9 +70,9 @@ pub fn setup_menu_button(
 ) {
     commands.spawn((root(), GameScreenTag)).with_children(|parent| {
         parent
-            .spawn(button(&theme))
+            .spawn(button_game(&theme))
             .with_children(|parent| {
-                parent.spawn(button_text(&asset_server, &theme, "Main Menu"));
+                parent.spawn(button_text_game(&asset_server, &theme, "Main Menu"));
             })
             .insert(ReloadButton);
     });

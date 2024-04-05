@@ -15,6 +15,18 @@ struct Camera;
 #[derive(Component)]
 struct OnMainMenuScreen;
 
+// Tag component used to tag entities added on the settings menu screen
+#[derive(Component)]
+struct OnSettingsMenuScreen;
+
+// Tag component used to tag entities added on the display settings menu screen
+#[derive(Component)]
+struct OnDisplaySettingsMenuScreen;
+
+// Tag component used to tag entities added on the sound settings menu screen
+#[derive(Component)]
+struct OnSoundSettingsMenuScreen;
+
 // Tag component used to mark which setting is currently selected
 #[derive(Component)]
 struct SelectedOption;
@@ -38,13 +50,13 @@ impl Plugin for MenuPlugin{
         app
             // Systems to handle the main menu screen
             .add_systems(OnEnter(MenuState::Main), main_menu_setup)
-            // Systems to despawn main menu
             .add_systems(OnExit(MenuState::Main), despawn_screen::<OnMainMenuScreen>)
+            // Systems to handle the settings menu screen
+            .add_systems(OnEnter(MenuState::Settings), settings_menu_setup)
+            .add_systems(OnExit(MenuState::Settings),despawn_screen::<OnSettingsMenuScreen>)
             // Common systems to all screens that handles buttons behavior
-            .add_systems(
-                Update,
-                (menu_action, button_system).run_if(in_state(PlayingState::NotPlaying)),
-            );
+            .add_systems(Update,(menu_action, button_system).run_if(in_state(PlayingState::NotPlaying)));
+            
     }
 }
 fn main_menu_setup(
@@ -79,11 +91,11 @@ fn main_menu_setup(
         color: TEXT_COLOR,
         ..default()
     };
-    let button_text_style_disable = TextStyle {
-        font_size: 30.0,
-        color: Color::rgb(244.0, 0.0, 9.0),
-        ..default()
-    };
+    // let button_text_style_disable = TextStyle {
+    //     font_size: 30.0,
+    //     color: Color::rgb(244.0, 0.0, 9.0),
+    //     ..default()
+    // };
 
     commands
         .spawn((
@@ -169,8 +181,8 @@ fn main_menu_setup(
                                 ..default()
                             });
                             parent.spawn(TextBundle::from_section(
-                                "!Settings!",
-                                button_text_style_disable.clone(),
+                                "Settings",
+                                button_text_style.clone(),
                                 
                             ));
                         });
@@ -192,6 +204,73 @@ fn main_menu_setup(
                             });
                             parent.spawn(TextBundle::from_section("Quit", button_text_style));
                         });
+                });
+        });
+}
+
+fn settings_menu_setup(mut commands: Commands) {
+    let button_style = Style {
+        width: Val::Px(200.0),
+        height: Val::Px(65.0),
+        margin: UiRect::all(Val::Px(20.0)),
+        justify_content: JustifyContent::Center,
+        align_items: AlignItems::Center,
+        ..default()
+    };
+
+    let button_text_style = TextStyle {
+        font_size: 40.0,
+        color: TEXT_COLOR,
+        ..default()
+    };
+
+    commands
+        .spawn((
+            NodeBundle {
+                style: Style {
+                    width: Val::Percent(100.0),
+                    height: Val::Percent(100.0),
+                    align_items: AlignItems::Center,
+                    justify_content: JustifyContent::Center,
+                    ..default()
+                },
+                ..default()
+            },
+            OnSettingsMenuScreen,
+        ))
+        .with_children(|parent| {
+            parent
+                .spawn(NodeBundle {
+                    style: Style {
+                        flex_direction: FlexDirection::Column,
+                        align_items: AlignItems::Center,
+                        ..default()
+                    },
+                    background_color: Color::CRIMSON.into(),
+                    ..default()
+                })
+                .with_children(|parent| {
+                    for (action, text) in [
+                        (MenuButtonAction::SettingsDisplay, "Display"),
+                        (MenuButtonAction::SettingsSound, "Sound"),
+                        (MenuButtonAction::BackToMainMenu, "Back"),
+                    ] {
+                        parent
+                            .spawn((
+                                ButtonBundle {
+                                    style: button_style.clone(),
+                                    background_color: NORMAL_BUTTON.into(),
+                                    ..default()
+                                },
+                                action,
+                            ))
+                            .with_children(|parent| {
+                                parent.spawn(TextBundle::from_section(
+                                    text,
+                                    button_text_style.clone(),
+                                ));
+                            });
+                    }
                 });
         });
 }
@@ -234,15 +313,13 @@ fn menu_action(
                     playing_state.set(PlayingState::Local);
                     menu_state.set(MenuState::Disabled);
                 }
-                //setting button interaction disable currently!!!
-                MenuButtonAction::Settings => menu_state.set(MenuState::Main),
+                MenuButtonAction::Settings => menu_state.set(MenuState::Settings),
                 MenuButtonAction::SettingsDisplay => {
-                    menu_state.set(MenuState::Main);
+                    menu_state.set(MenuState::SettingsDisplay);
                 }
                 MenuButtonAction::SettingsSound => {
-                    menu_state.set(MenuState::Main);
+                    menu_state.set(MenuState::SettingsSound);
                 }
-                //setting button interaction disable currently!!!
                 MenuButtonAction::BackToMainMenu => menu_state.set(MenuState::Main),
                 MenuButtonAction::BackToSettings => {
                     menu_state.set(MenuState::Settings);
