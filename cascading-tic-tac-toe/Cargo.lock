@@ -1321,6 +1321,7 @@ dependencies = [
  "bevy",
  "bevy_kira_audio",
  "embed-resource",
+<<<<<<< HEAD
  "image 0.25.1",
 =======
 >>>>>>> parent of bf6f64b (restore)
