@@ -1321,10 +1321,7 @@ dependencies = [
  "bevy",
  "bevy_kira_audio",
  "embed-resource",
-<<<<<<< HEAD
  "image 0.25.1",
-=======
->>>>>>> parent of bf6f64b (restore)
  "test-case",
  "winit",
 ]
@@ -3487,7 +3484,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "94143f37725109f92c262ed2cf5e59bce7498c01bcc1502d7b9afe439a4e9f49"
 
 [[package]]
-<<<<<<< HEAD
 name = "sctk-adwaita"
 version = "0.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3501,8 +3497,6 @@ dependencies = [
 ]
 
 [[package]]
-=======
->>>>>>> parent of bf6f64b (restore)
 name = "semver"
 version = "1.0.22"
 source = "registry+https://github.com/rust-lang/crates.io-index"
