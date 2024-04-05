@@ -2,9 +2,8 @@ use bevy::prelude::*;
 use bevy_kira_audio::prelude::*;
 use std::borrow::BorrowMut;
 
-use crate::{
-    CellState, GameScreenTag, GameState, GridCell, Player, PlayerTurn, RoundCount, StateWrapper
-};
+use crate::{CellState, GameScreenTag, GameState, GridCell, Player, PlayerTurn, RoundCount, StateWrapper};
+use crate::ui_components::bundles::{button_bundle, text_bundle};
 use crate::theme::theme::UiTheme;
 use crate::utils::modify_text::modify_text;
 
@@ -222,47 +221,6 @@ pub fn menu_background(theme: &Res<UiTheme>) -> NodeBundle {
     }
 }
 
-pub fn button(theme: &Res<UiTheme>) -> ButtonBundle {
-    // Define the button bundle with styles and properties
-    ButtonBundle {
-        style: Style {
-            // Set the width to 100% of the parent's width
-            width: Val::Percent(100.0),
-            // Set the height to 100% of the parent's height
-            height: Val::Percent(100.0),
-            // Justify content to the center
-            justify_content: JustifyContent::Center,
-            // Align items to the center
-            align_items: AlignItems::Center,
-            ..Default::default()
-        },
-        // Set the background color of the button to the button color defined in the theme
-        background_color: theme.button,
-        ..Default::default()
-    }
-}
-
-pub fn button_text(
-    asset_server: &Res<AssetServer>,
-    theme: &Res<UiTheme>,
-    label: &str,
-) -> TextBundle {
-    // Define the text bundle with styles and properties
-    TextBundle {
-        text: Text::from_section(
-            label,
-            TextStyle {
-                // Load the FiraSans-Bold font from the asset server
-                font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                // Set the font size to 30 pixels
-                font_size: 30.0,
-                // Set the color of the text to the button text color defined in the theme
-                color: theme.button_text,
-            },
-        ),
-        ..Default::default()
-    }
-}
 
 fn generate_invalid_cells(n: u32, list: &mut Vec<u32>) {
     let cols = n + 3;
@@ -316,10 +274,13 @@ pub fn setup_board(
                                 parent.spawn(square_border(&theme)).with_children(|parent| {
                                     // Spawn the button node with children
                                     parent
-                                        .spawn(button(&theme))
+                                        .spawn(button_bundle(
+                                            (Val::Percent(100.0), Val::Percent(100.0), None, JustifyContent::Center, AlignItems::Center),
+                                            theme.button
+                                        ))
                                         .with_children(|parent| {
                                             // Spawn the button text node
-                                            parent.spawn(button_text(&asset_server, &theme, "-"));
+                                            parent.spawn(text_bundle("-", &asset_server, (30.0, theme.button_text)));
                                         })
                                         // Insert the GridCell component
                                         .insert(GridCell {
@@ -332,10 +293,13 @@ pub fn setup_board(
                                 parent.spawn(square_border(&theme)).with_children(|parent| {
                                     // Spawn the button node with children
                                     parent
-                                        .spawn(button(&theme))
+                                        .spawn(button_bundle(
+                                            (Val::Percent(100.0), Val::Percent(100.0), None, JustifyContent::Center, AlignItems::Center),
+                                            theme.button
+                                        ))
                                         .with_children(|parent| {
                                             // Spawn the button text node
-                                            parent.spawn(button_text(&asset_server, &theme, ""));
+                                            parent.spawn(text_bundle("", &asset_server, (30.0, theme.button_text)));
                                         })
                                         // Insert the GridCell component
                                         .insert(GridCell {

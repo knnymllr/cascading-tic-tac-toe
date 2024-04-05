@@ -28,13 +28,17 @@ mod board;
 mod start_menu;
 mod game_screen;
 
-mod utils {
-    pub mod modify_text;
-    pub mod despawn_screen;
+mod ui_components {
+    pub mod bundles;
 }
 
 mod theme {
     pub mod theme;
+}
+
+mod utils {
+    pub mod modify_text;
+    pub mod despawn_screen;
 }
 
 fn main() {
@@ -60,7 +64,7 @@ fn main() {
     .add_plugins(WinningLogicPlugin)
     .add_plugins(MenuPlugin)
     .add_plugins(GameScreen)
-    .add_systems(Startup, (set_window_icon, start_background_audio))
+    .add_systems(Startup, (place_camera, set_window_icon, start_background_audio))
     .run();
 }
 
@@ -81,4 +85,8 @@ fn set_window_icon(windows: NonSend<WinitWindows>, primary_window: Query<Entity,
         let icon = Icon::from_rgba(rgba, width, height).unwrap();
         primary.set_window_icon(Some(icon));
     };
+}
+
+fn place_camera(mut commands: Commands) {
+    commands.spawn(Camera2dBundle::default());
 }
