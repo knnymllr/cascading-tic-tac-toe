@@ -43,11 +43,3 @@ pub enum MenuState {
     SettingsSound,
     Disabled,
 }
-
-// Display settings that can be set through the setting submenu.
-#[derive(Resource, Debug, Component, PartialEq, Eq, Clone, Copy)]
-pub enum DisplaySize {
-    Small,
-    Medium,
-    Large,
-}

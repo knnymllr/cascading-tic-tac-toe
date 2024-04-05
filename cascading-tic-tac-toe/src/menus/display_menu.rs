@@ -110,8 +110,7 @@ pub fn display_settings_menu_setup(mut commands: Commands, display_quality: Res<
 pub fn toggle_resolution(
     interaction_query: Query<
     (&Interaction, &DisplaySize),
-    (Changed<Interaction>, With<Button>),
-    >,
+    (Changed<Interaction>, With<Button>),>,
     mut windows: Query<&mut Window>,
     resolution: Res<ResolutionSettings>,
 ) {

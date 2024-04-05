@@ -29,7 +29,7 @@ impl Plugin for MenuPlugin{
             .add_systems(Update,setting_button::<SoundVolume>.run_if(in_state(MenuState::SettingsSound)))
             .add_systems(OnExit(MenuState::SettingsSound),despawn_screen::<OnSoundSettingsMenuScreen>)
             // Systems to adjust Audio volume
-            .add_systems(Update, volume)
+            .add_systems(Update, toggle_volume)
             // Systems to adjust screen resolution
             .add_systems(Update, toggle_resolution)
             // Common systems to all screens that handles buttons behavior

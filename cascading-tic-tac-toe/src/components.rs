@@ -77,6 +77,14 @@ pub struct MainCamera {
     #[derive(Component)]
     pub struct MyMusic;
 
+
+    // Display settings that can be set through the setting submenu.
+    #[derive(Resource, Debug, Component, PartialEq, Eq, Clone, Copy)]
+    pub enum DisplaySize {
+        Small,
+        Medium,
+        Large,
+    }
     /// Stores the various window-resolutions we can select between.
     #[derive(Resource)]
     pub struct ResolutionSettings {

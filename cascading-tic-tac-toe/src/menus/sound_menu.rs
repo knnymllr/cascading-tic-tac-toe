@@ -90,15 +90,47 @@ pub fn sound_settings_menu_setup(mut commands: Commands, volume: Res<SoundVolume
         });
 }
 
-pub fn volume(
-    keyboard_input: Res<ButtonInput<KeyCode>>,
+pub fn toggle_volume(
+    interaction_query: Query<
+    (&Interaction, &SoundVolume),(Changed<Interaction>, With<Button>),>,
     music_controller: Query<&AudioSink, With<MyMusic>>,
 ) {
-    if let Ok(sink) = music_controller.get_single() {
-        if keyboard_input.just_pressed(KeyCode::Equal) {
-            sink.set_volume(sink.volume() + 0.1);
-        } else if keyboard_input.just_pressed(KeyCode::Minus) {
-            sink.set_volume(sink.volume() - 0.1);
+    for (interaction, sound_volume) in &interaction_query {
+        if *interaction == Interaction::Pressed {
+            if let Ok(sink) = music_controller.get_single(){
+                match sound_volume{
+                    SoundVolume(0) =>{
+                        sink.set_volume(0.0);
+                    }
+                    SoundVolume(1) => {
+                        sink.set_volume(0.25);
+                    }
+                    SoundVolume(2) =>{
+                        sink.set_volume(0.5);
+                    }
+                    SoundVolume(3) =>{
+                        sink.set_volume(0.75);
+                    }
+                    SoundVolume(4) =>{
+                        sink.set_volume(1.0);
+                    }
+                    SoundVolume(5) =>{
+                        sink.set_volume(1.5);
+                    }
+                    SoundVolume(6) =>{
+                        sink.set_volume(2.0);
+                    }
+                    SoundVolume(7) =>{
+                        sink.set_volume(2.5);
+                    }
+                    SoundVolume(8) =>{
+                        sink.set_volume(3.0);
+                    }
+                    SoundVolume(9..=u32::MAX) =>{
+                        sink.set_volume(4.0);
+                    }
+                }
+            }
         }
     }
 }
