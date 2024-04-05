@@ -1,6 +1,7 @@
 use bevy_kira_audio::prelude::*;
 use bevy::prelude::*;
 
+pub use menus::*;
 pub use states::*;
 pub use components::*;
 pub use resources::*;
@@ -8,7 +9,6 @@ pub use game_instructions::*;
 pub use winning_logic::*;
 pub use in_game_menu::*;
 pub use board::*;
-pub use menu::*;
 pub use game_screen::*;
 
 mod states;
@@ -18,7 +18,7 @@ mod game_instructions;
 mod winning_logic;
 mod in_game_menu;
 mod board;
-mod menu;
+mod menus;
 mod game_screen;
 
 fn main() {
@@ -32,6 +32,8 @@ fn main() {
         ..default()
     }))
     .add_plugins(AudioPlugin)
+    .insert_resource(DisplayQuality::Medium)
+    .insert_resource(SoundVolume(7))
     .init_resource::<UiTheme>()
     .insert_resource(ClearColor(Color::rgb(0.04, 0.04, 0.04)))
     .insert_resource::<MainCamera>(MainCamera{id:None})
@@ -41,7 +43,7 @@ fn main() {
     .insert_state(PlayerTurn::X)
     .insert_state(GameState::GameOngoing)
     .add_plugins(WinningLogicPlugin)
-    .add_plugins(MenuPlugin)
+    .add_plugins(main_menu::MenuPlugin)
     .add_plugins(GameScreen)
     .add_systems(Startup, start_background_audio)
     .run();

@@ -1,48 +1,14 @@
 use bevy::{app::AppExit, prelude::*};
-use crate::{GameState, MainCamera, MenuState, PlayingState};
+use crate::{GameState, MainCamera, MenuState, PlayingState,OnMainMenuScreen,OnSettingsMenuScreen,
+    OnDisplaySettingsMenuScreen,CameraMenu,MenuButtonAction,SelectedOption,SoundVolume,OnSoundSettingsMenuScreen,
+    display_menu::display_settings_menu_setup,sound_menu::sound_settings_menu_setup,DisplayQuality};
 
 //colors
-const TEXT_COLOR: Color = Color::rgb(0.9, 0.9, 0.9);
-const NORMAL_BUTTON: Color = Color::rgb(0.15, 0.15, 0.15);
-const HOVERED_BUTTON: Color = Color::rgb(0.25, 0.25, 0.25);
-const HOVERED_PRESSED_BUTTON: Color = Color::rgb(0.25, 0.65, 0.25);
-const PRESSED_BUTTON: Color = Color::rgb(0.35, 0.75, 0.35);
-
-#[derive(Component)]
-struct Camera;
-
-// Tag component used to tag entities added on the main menu screen
-#[derive(Component)]
-struct OnMainMenuScreen;
-
-// Tag component used to tag entities added on the settings menu screen
-#[derive(Component)]
-struct OnSettingsMenuScreen;
-
-// Tag component used to tag entities added on the display settings menu screen
-#[derive(Component)]
-struct OnDisplaySettingsMenuScreen;
-
-// Tag component used to tag entities added on the sound settings menu screen
-#[derive(Component)]
-struct OnSoundSettingsMenuScreen;
-
-// Tag component used to mark which setting is currently selected
-#[derive(Component)]
-struct SelectedOption;
-
-// All actions that can be triggered from a button click
-#[derive(Component)]
-pub enum MenuButtonAction {
-    Play,
-    Settings,
-    SettingsDisplay,
-    SettingsSound,
-    BackToMainMenu,
-    BackToSettings,
-    Quit,
-}
-
+pub const TEXT_COLOR: Color = Color::rgb(0.9, 0.9, 0.9);
+pub const NORMAL_BUTTON: Color = Color::rgb(0.15, 0.15, 0.15);
+pub const HOVERED_BUTTON: Color = Color::rgb(0.25, 0.25, 0.25);
+pub const HOVERED_PRESSED_BUTTON: Color = Color::rgb(0.25, 0.65, 0.25);
+pub const PRESSED_BUTTON: Color = Color::rgb(0.35, 0.75, 0.35);
 pub struct MenuPlugin;
 
 impl Plugin for MenuPlugin{
@@ -54,11 +20,20 @@ impl Plugin for MenuPlugin{
             // Systems to handle the settings menu screen
             .add_systems(OnEnter(MenuState::Settings), settings_menu_setup)
             .add_systems(OnExit(MenuState::Settings),despawn_screen::<OnSettingsMenuScreen>)
+            // Systems to handle the display settings screen
+            .add_systems(OnEnter(MenuState::SettingsDisplay),display_settings_menu_setup)
+            .add_systems(Update,setting_button::<DisplayQuality>.run_if(in_state(MenuState::SettingsDisplay)))
+            .add_systems(OnExit(MenuState::SettingsDisplay),despawn_screen::<OnDisplaySettingsMenuScreen>)
+            // Systems to handle the sound settings screen
+            .add_systems(OnEnter(MenuState::SettingsSound), sound_settings_menu_setup)
+            .add_systems(Update,setting_button::<SoundVolume>.run_if(in_state(MenuState::SettingsSound)))
+            .add_systems(OnExit(MenuState::SettingsSound),despawn_screen::<OnSoundSettingsMenuScreen>)
             // Common systems to all screens that handles buttons behavior
             .add_systems(Update,(menu_action, button_system).run_if(in_state(PlayingState::NotPlaying)));
             
     }
 }
+
 fn main_menu_setup(
     mut cam: ResMut<MainCamera>,
     mut commands: Commands,
@@ -66,7 +41,7 @@ fn main_menu_setup(
 ) {
 
     if !cam.id.is_some() {
-        cam.id = Option::from(commands.spawn((Camera2dBundle::default(), Camera)).id());
+        cam.id = Option::from(commands.spawn((Camera2dBundle::default(), CameraMenu)).id());
     }
 
     // Common style for all buttons on the screen
@@ -206,6 +181,25 @@ fn main_menu_setup(
                         });
                 });
         });
+}
+
+// This system updates the settings when a new value for a setting is selected, and marks
+// the button as the one currently selected
+fn setting_button<T: Resource + Component + PartialEq + Copy>(
+    interaction_query: Query<(&Interaction, &T, Entity), (Changed<Interaction>, With<Button>)>,
+    mut selected_query: Query<(Entity, &mut BackgroundColor), With<SelectedOption>>,
+    mut commands: Commands,
+    mut setting: ResMut<T>,
+) {
+    for (interaction, button_setting, entity) in &interaction_query {
+        if *interaction == Interaction::Pressed && *setting != *button_setting {
+            let (previous_button, mut previous_color) = selected_query.single_mut();
+            *previous_color = NORMAL_BUTTON.into();
+            commands.entity(previous_button).remove::<SelectedOption>();
+            commands.entity(entity).insert(SelectedOption);
+            *setting = *button_setting;
+        }
+    }
 }
 
 fn settings_menu_setup(mut commands: Commands) {

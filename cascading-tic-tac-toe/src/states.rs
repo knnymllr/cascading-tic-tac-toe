@@ -1,4 +1,4 @@
-use bevy::prelude::{Reflect, States};
+use bevy::prelude::*;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash, States, Reflect)]
 pub enum Player {
@@ -42,4 +42,12 @@ pub enum MenuState {
     SettingsDisplay,
     SettingsSound,
     Disabled,
+}
+
+// Display settings that can be set through the setting submenu.
+#[derive(Resource, Debug, Component, PartialEq, Eq, Clone, Copy)]
+pub enum DisplayQuality {
+    Low,
+    Medium,
+    High,
 }
