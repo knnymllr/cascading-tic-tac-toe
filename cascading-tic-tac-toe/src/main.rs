@@ -1,3 +1,5 @@
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+
 use bevy_kira_audio::prelude::*;
 use bevy::prelude::*;
 
@@ -22,6 +24,7 @@ mod start_menu;
 mod game_screen;
 
 fn main() {
+
     let mut app = App::new();
     app.add_plugins(DefaultPlugins.set(WindowPlugin {
         primary_window: Some(Window {
