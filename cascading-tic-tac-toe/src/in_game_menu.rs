@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
-use crate::{GameScreenTag, MenuState, PlayingState, UiTheme};
+use crate::{GameScreenTag, MenuState, PlayingState};
+use crate::theme::theme::UiTheme;
 
 #[derive(Component)]
 pub struct ReloadButton;

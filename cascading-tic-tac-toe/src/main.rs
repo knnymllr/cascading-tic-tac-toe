@@ -1,5 +1,6 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use crate::theme::theme::UiTheme;
 use std::io::Cursor;
 use bevy_kira_audio::prelude::*;
 use bevy::prelude::*;
@@ -29,6 +30,11 @@ mod game_screen;
 
 mod utils {
     pub mod modify_text;
+    pub mod despawn_screen;
+}
+
+mod theme {
+    pub mod theme;
 }
 
 fn main() {

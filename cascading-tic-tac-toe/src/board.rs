@@ -1,40 +1,17 @@
 use bevy::prelude::*;
 use bevy_kira_audio::prelude::*;
+use std::borrow::BorrowMut;
 
 use crate::{
-    CellState, GameScreenTag, GameState, GridCell, Player, PlayerTurn, RoundCount, StateWrapper,
+    CellState, GameScreenTag, GameState, GridCell, Player, PlayerTurn, RoundCount, StateWrapper
 };
+use crate::theme::theme::UiTheme;
+use crate::utils::modify_text::modify_text;
 
 /// Event triggered when a cell is clicked
 #[derive(Event)]
 pub struct CellClickedEvent {
     entity: Entity,
-}
-
-/// Resource containing UI theme settings
-#[derive(Resource)]
-pub struct UiTheme {
-    pub root: BackgroundColor,
-    pub border: BackgroundColor,
-    pub menu: BackgroundColor,
-    pub button: BackgroundColor,
-    pub button_hovered: BackgroundColor,
-    pub button_pressed: BackgroundColor,
-    pub button_text: Color,
-}
-
-impl FromWorld for UiTheme {
-    fn from_world(_: &mut World) -> Self {
-        UiTheme {
-            root: Color::NONE.into(),
-            border: Color::rgb(0.65, 0.65, 0.65).into(),
-            menu: Color::rgb(0.15, 0.15, 0.15).into(),
-            button: Color::rgb(0.15, 0.15, 0.15).into(),
-            button_hovered: Color::rgb(0.35, 0.75, 0.35).into(),
-            button_pressed: Color::rgb(0.35, 0.75, 0.35).into(),
-            button_text: Color::WHITE,
-        }
-    }
 }
 
 /// System for handling board cell interaction
@@ -61,25 +38,26 @@ pub fn board_cell_interaction_system(
             }
             Interaction::Hovered => {
                 *color = theme.button_hovered;
+
                 let text = match player_turn.clone() {
                     PlayerTurn::X => "X",
                     PlayerTurn::O => "O",
                 };
-
-                for child in children.iter() {
-                    if let Ok(mut cell_text) = cell_text_query.get_mut(*child) {
-                        cell_text.sections[0].value = text.to_string();
-                    }
-                }
+                modify_text(
+                    children,
+                    cell_text_query.borrow_mut(),
+                    text.to_string(),
+                    (None, None, Some(theme.button_text_hovered))
+                );
             },
             Interaction::None => {
                 *color = theme.button;
-
-                for child in children.iter() {
-                    if let Ok(mut cell_text) = cell_text_query.get_mut(*child) {
-                        cell_text.sections[0].value = "".to_string();
-                    }
-                }
+                modify_text(
+                    children,
+                    cell_text_query.borrow_mut(),
+                    "".to_string(),
+                    (None, None, Some(theme.button_text_hovered))
+                );
             },
         }
     }
@@ -87,6 +65,7 @@ pub fn board_cell_interaction_system(
 
 /// System for handling cell click events
 pub fn on_cell_clicked(
+    theme: Res<UiTheme>,
     mut events: EventReader<CellClickedEvent>,
     mut cell_query: Query<(&mut GridCell, &Children)>,
     mut cell_text_query: Query<&mut Text>,
@@ -109,7 +88,7 @@ pub fn on_cell_clicked(
 
         audio.play(movement_sound.clone());
         update_cell_state(&mut cell, &player_turn_state.get());
-        update_cell_text(&mut cell_text_query, children, &player_turn_state.get());
+        update_cell_text(&theme, &mut cell_text_query, children, &player_turn_state.get());
         update_player_turn(&mut state);
     }
 }
@@ -124,6 +103,7 @@ fn update_cell_state(cell: &mut Mut<GridCell>, player_turn: &PlayerTurn) {
 
 /// Updates the text of the clicked cell based on the current player turn
 fn update_cell_text(
+    theme: &Res<UiTheme>,
     cell_text_query: &mut Query<&mut Text>,
     children: &Children,
     player_turn: &PlayerTurn,
@@ -133,11 +113,12 @@ fn update_cell_text(
         PlayerTurn::O => "O",
     };
 
-    for child in children.iter() {
-        if let Ok(mut cell_text) = cell_text_query.get_mut(*child) {
-            cell_text.sections[0].value = text.to_string();
-        }
-    }
+    modify_text(
+        children,
+        cell_text_query.borrow_mut(),
+        text.to_string(),
+        (None, None, Some(theme.button_text))
+    );
 }
 
 /// Updates the player turn state to the next player
