@@ -1,6 +1,5 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use crate::theme::theme::UiTheme;
 use std::io::Cursor;
 use bevy_kira_audio::prelude::*;
 use bevy::prelude::*;
@@ -64,7 +63,7 @@ fn main() {
     .add_plugins(WinningLogicPlugin)
     .add_plugins(MenuPlugin)
     .add_plugins(GameScreen)
-    .add_systems(Startup, (place_camera, set_window_icon, start_background_audio))
+    .add_systems(Startup, (set_window_icon, start_background_audio))
     .run();
 }
 
@@ -85,8 +84,4 @@ fn set_window_icon(windows: NonSend<WinitWindows>, primary_window: Query<Entity,
         let icon = Icon::from_rgba(rgba, width, height).unwrap();
         primary.set_window_icon(Some(icon));
     };
-}
-
-fn place_camera(mut commands: Commands) {
-    commands.spawn(Camera2dBundle::default());
 }
