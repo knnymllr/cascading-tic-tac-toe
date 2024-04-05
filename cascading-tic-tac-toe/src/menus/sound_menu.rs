@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use crate::{SelectedOption,SoundVolume,MenuButtonAction,OnSoundSettingsMenuScreen,main_menu::*};
+use crate::{SelectedOption,SoundVolume,MenuButtonAction,MyMusic,OnSoundSettingsMenuScreen,main_menu::*};
 
 pub fn sound_settings_menu_setup(mut commands: Commands, volume: Res<SoundVolume>) {
     let button_style = Style {
@@ -88,4 +88,17 @@ pub fn sound_settings_menu_setup(mut commands: Commands, volume: Res<SoundVolume
                         });
                 });
         });
+}
+
+pub fn volume(
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+    music_controller: Query<&AudioSink, With<MyMusic>>,
+) {
+    if let Ok(sink) = music_controller.get_single() {
+        if keyboard_input.just_pressed(KeyCode::Equal) {
+            sink.set_volume(sink.volume() + 0.1);
+        } else if keyboard_input.just_pressed(KeyCode::Minus) {
+            sink.set_volume(sink.volume() - 0.1);
+        }
+    }
 }

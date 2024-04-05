@@ -32,7 +32,8 @@ fn main() {
         ..default()
     }))
     .add_plugins(AudioPlugin)
-    .insert_resource(DisplayQuality::Medium)
+    .insert_resource(ResolutionSettings {large: Vec2::new(1920.0, 1080.0),medium: Vec2::new(1000.0, 600.0),small: Vec2::new(560.0, 820.0),})
+    .insert_resource(DisplaySize::Medium)
     .insert_resource(SoundVolume(7))
     .init_resource::<UiTheme>()
     .insert_resource(ClearColor(Color::rgb(0.04, 0.04, 0.04)))
@@ -49,6 +50,12 @@ fn main() {
     .run();
 }
 
-fn start_background_audio(asset_server: Res<AssetServer>, audio: Res<Audio>) {
-    audio.play(asset_server.load("sounds/mammoth.ogg")).looped();
+fn start_background_audio(asset_server: Res<AssetServer>, mut commands: Commands) {
+    commands.spawn((
+        AudioBundle {
+            source: asset_server.load("sounds/mammoth.ogg"),
+            ..default()
+        },
+        MyMusic,
+    ));
 }

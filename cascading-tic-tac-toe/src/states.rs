@@ -46,8 +46,8 @@ pub enum MenuState {
 
 // Display settings that can be set through the setting submenu.
 #[derive(Resource, Debug, Component, PartialEq, Eq, Clone, Copy)]
-pub enum DisplayQuality {
-    Low,
+pub enum DisplaySize {
+    Small,
     Medium,
-    High,
+    Large,
 }

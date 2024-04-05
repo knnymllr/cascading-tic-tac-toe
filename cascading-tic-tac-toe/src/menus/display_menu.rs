@@ -1,8 +1,8 @@
 use bevy::prelude::*;
-use crate::{DisplayQuality,SelectedOption,MenuButtonAction,OnDisplaySettingsMenuScreen,main_menu::*};
+use crate::{DisplaySize,SelectedOption,MenuButtonAction,OnDisplaySettingsMenuScreen,ResolutionSettings,main_menu::*};
 
 
-pub fn display_settings_menu_setup(mut commands: Commands, display_quality: Res<DisplayQuality>) {
+pub fn display_settings_menu_setup(mut commands: Commands, display_quality: Res<DisplaySize>) {
     let button_style = Style {
         width: Val::Px(200.0),
         height: Val::Px(65.0),
@@ -57,14 +57,14 @@ pub fn display_settings_menu_setup(mut commands: Commands, display_quality: Res<
                         .with_children(|parent| {
                             // Display a label for the current setting
                             parent.spawn(TextBundle::from_section(
-                                "Display Quality",
+                                "Display Size",
                                 button_text_style.clone(),
                             ));
                             // Display a button for each possible value
-                            for quality_setting in [
-                                DisplayQuality::Low,
-                                DisplayQuality::Medium,
-                                DisplayQuality::High,
+                            for display_size in [
+                                DisplaySize::Small,
+                                DisplaySize::Medium,
+                                DisplaySize::Large,
                             ] {
                                 let mut entity = parent.spawn((
                                     ButtonBundle {
@@ -76,15 +76,15 @@ pub fn display_settings_menu_setup(mut commands: Commands, display_quality: Res<
                                         background_color: NORMAL_BUTTON.into(),
                                         ..default()
                                     },
-                                    quality_setting,
+                                    display_size,
                                 ));
                                 entity.with_children(|parent| {
                                     parent.spawn(TextBundle::from_section(
-                                        format!("{quality_setting:?}"),
+                                        format!("{display_size:?}"),
                                         button_text_style.clone(),
                                     ));
                                 });
-                                if *display_quality == quality_setting {
+                                if *display_quality == display_size {
                                     entity.insert(SelectedOption);
                                 }
                             }
@@ -104,4 +104,34 @@ pub fn display_settings_menu_setup(mut commands: Commands, display_quality: Res<
                         });
                 });
         });
+}
+
+/// This system shows how to request the window to a new resolution
+pub fn toggle_resolution(
+    interaction_query: Query<
+    (&Interaction, &DisplaySize),
+    (Changed<Interaction>, With<Button>),
+    >,
+    mut windows: Query<&mut Window>,
+    resolution: Res<ResolutionSettings>,
+) {
+    let mut window = windows.single_mut();
+    for (interaction, display_size) in &interaction_query {
+        if *interaction == Interaction::Pressed {
+            match display_size {
+                &DisplaySize :: Small => {
+                    let res = resolution.small;
+                    window.resolution.set(res.x, res.y);
+                }
+                DisplaySize :: Medium =>{
+                    let res = resolution.medium;
+                    window.resolution.set(res.x, res.y);
+                }
+                DisplaySize :: Large =>{
+                    let res = resolution.large;
+                    window.resolution.set(res.x, res.y);
+                }
+            }
+        }
+    }
 }

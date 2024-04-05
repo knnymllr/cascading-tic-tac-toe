@@ -1,7 +1,7 @@
 use crate::CellState;
 use bevy::ecs::component::Component;
+use bevy::math::Vec2;
 use bevy::prelude::{Entity, NextState, ResMut, Resource, States};
-
 /// Represents a single cell in the Tic-Tac-Toe grid
 // #[derive(Component, Clone)]
 // pub struct TicTacToeCell {
@@ -72,5 +72,17 @@ pub struct MainCamera {
     // Sound settings that can be set through setting submenu.
     #[derive(Resource, Debug, Component, PartialEq, Eq, Clone, Copy)]
     pub struct SoundVolume(pub u32);
+
+    // Background music
+    #[derive(Component)]
+    pub struct MyMusic;
+
+    /// Stores the various window-resolutions we can select between.
+    #[derive(Resource)]
+    pub struct ResolutionSettings {
+        pub large: Vec2,
+        pub medium: Vec2,
+        pub small: Vec2,
+    }
 
 

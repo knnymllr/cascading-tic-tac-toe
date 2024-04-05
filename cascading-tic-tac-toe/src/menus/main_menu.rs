@@ -1,7 +1,7 @@
 use bevy::{app::AppExit, prelude::*};
 use crate::{GameState, MainCamera, MenuState, PlayingState,OnMainMenuScreen,OnSettingsMenuScreen,
     OnDisplaySettingsMenuScreen,CameraMenu,MenuButtonAction,SelectedOption,SoundVolume,OnSoundSettingsMenuScreen,
-    display_menu::display_settings_menu_setup,sound_menu::sound_settings_menu_setup,DisplayQuality};
+    display_menu::*,sound_menu::*,DisplaySize};
 
 //colors
 pub const TEXT_COLOR: Color = Color::rgb(0.9, 0.9, 0.9);
@@ -22,12 +22,16 @@ impl Plugin for MenuPlugin{
             .add_systems(OnExit(MenuState::Settings),despawn_screen::<OnSettingsMenuScreen>)
             // Systems to handle the display settings screen
             .add_systems(OnEnter(MenuState::SettingsDisplay),display_settings_menu_setup)
-            .add_systems(Update,setting_button::<DisplayQuality>.run_if(in_state(MenuState::SettingsDisplay)))
+            .add_systems(Update,setting_button::<DisplaySize>.run_if(in_state(MenuState::SettingsDisplay)))
             .add_systems(OnExit(MenuState::SettingsDisplay),despawn_screen::<OnDisplaySettingsMenuScreen>)
             // Systems to handle the sound settings screen
             .add_systems(OnEnter(MenuState::SettingsSound), sound_settings_menu_setup)
             .add_systems(Update,setting_button::<SoundVolume>.run_if(in_state(MenuState::SettingsSound)))
             .add_systems(OnExit(MenuState::SettingsSound),despawn_screen::<OnSoundSettingsMenuScreen>)
+            // Systems to adjust Audio volume
+            .add_systems(Update, volume)
+            // Systems to adjust screen resolution
+            .add_systems(Update, toggle_resolution)
             // Common systems to all screens that handles buttons behavior
             .add_systems(Update,(menu_action, button_system).run_if(in_state(PlayingState::NotPlaying)));
             
@@ -183,8 +187,8 @@ fn main_menu_setup(
         });
 }
 
-// This system updates the settings when a new value for a setting is selected, and marks
-// the button as the one currently selected
+// This system updates the settings when a new value for a setting is selected, 
+// and marks the button as the one currently selected
 fn setting_button<T: Resource + Component + PartialEq + Copy>(
     interaction_query: Query<(&Interaction, &T, Entity), (Changed<Interaction>, With<Button>)>,
     mut selected_query: Query<(Entity, &mut BackgroundColor), With<SelectedOption>>,
