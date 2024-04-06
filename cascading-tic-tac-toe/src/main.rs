@@ -8,6 +8,7 @@ use bevy::window::PrimaryWindow;
 use bevy::winit::WinitWindows;
 use winit::window::Icon;
 
+pub use menus::*;
 pub use states::*;
 pub use components::*;
 pub use resources::*;
@@ -15,7 +16,6 @@ pub use game_instructions::*;
 pub use winning_logic::*;
 pub use in_game_menu::*;
 pub use board::*;
-pub use start_menu::*;
 pub use game_screen::*;
 
 mod states;
@@ -25,7 +25,7 @@ mod game_instructions;
 mod winning_logic;
 mod in_game_menu;
 mod board;
-mod start_menu;
+mod menus;
 mod game_screen;
 
 mod ui_components {
@@ -53,6 +53,9 @@ fn main() {
         ..default()
     }))
     .add_plugins(AudioPlugin)
+    .insert_resource(ResolutionSettings {large: Vec2::new(1920.0, 1080.0),medium: Vec2::new(1000.0, 600.0),small: Vec2::new(560.0, 820.0),})
+    .insert_resource(DisplaySize::Medium)
+    .insert_resource(SoundVolume(7))
     .init_resource::<UiTheme>()
     .insert_resource(ClearColor(Color::rgb(0.04, 0.04, 0.04)))
     .insert_resource::<MainCamera>(MainCamera{id:None})
@@ -62,16 +65,22 @@ fn main() {
     .insert_state(PlayerTurn::X)
     .insert_state(GameState::GameOngoing)
     .add_plugins(WinningLogicPlugin)
-    .add_plugins(MenuPlugin)
+    .add_plugins(main_menu::MenuPlugin)
     .add_plugins(GameScreen)
     .add_systems(Startup, (place_camera, set_window_icon, start_background_audio))
     .run();
 }
 
-fn start_background_audio(asset_server: Res<AssetServer>, audio: Res<Audio>) {
-    audio.play(asset_server.load("sounds/mammoth.ogg")).looped();
+fn start_background_audio(asset_server: Res<AssetServer>, mut commands: Commands) {
+    commands.spawn((
+        AudioBundle {
+            source: asset_server.load("sounds/mammoth.ogg"),
+            ..default()
+        },
+        MyMusic,
+    ));
+    
 }
-
 fn set_window_icon(windows: NonSend<WinitWindows>, primary_window: Query<Entity, With<PrimaryWindow>>) {
 
     let primary_entity = primary_window.single();

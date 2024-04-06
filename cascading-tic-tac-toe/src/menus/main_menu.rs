@@ -1,34 +1,17 @@
 use bevy::{app::AppExit, prelude::*};
-use crate::{GameState, MenuState, PlayingState};
+use crate::{GameState, MenuState, PlayingState,OnMainMenuScreen,OnSettingsMenuScreen,
+    OnDisplaySettingsMenuScreen,MenuButtonAction,SelectedOption,SoundVolume,OnSoundSettingsMenuScreen,
+    display_menu::*,sound_menu::*,DisplaySize};
+
 use crate::ui_components::bundles::{button_bundle, image_bundle, text_bundle};
 use crate::utils::despawn_screen::despawn_screen;
 
 //colors
-const TEXT_COLOR: Color = Color::rgb(0.9, 0.9, 0.9);
-const NORMAL_BUTTON: Color = Color::rgb(0.15, 0.15, 0.15);
-const HOVERED_BUTTON: Color = Color::rgb(0.25, 0.25, 0.25);
-const HOVERED_PRESSED_BUTTON: Color = Color::rgb(0.25, 0.65, 0.25);
-const PRESSED_BUTTON: Color = Color::rgb(0.35, 0.75, 0.35);
-
-// Tag component used to tag entities added on the main menu screen
-#[derive(Component)]
-struct OnMainMenuScreen;
-
-// Tag component used to mark which setting is currently selected
-#[derive(Component)]
-struct SelectedOption;
-
-// All actions that can be triggered from a button click
-#[derive(Component)]
-pub enum MenuButtonAction {
-    Play,
-    Settings,
-    SettingsDisplay,
-    SettingsSound,
-    BackToMainMenu,
-    BackToSettings,
-    Quit,
-}
+pub const TEXT_COLOR: Color = Color::rgb(0.9, 0.9, 0.9);
+pub const NORMAL_BUTTON: Color = Color::rgb(0.15, 0.15, 0.15);
+pub const HOVERED_BUTTON: Color = Color::rgb(0.25, 0.25, 0.25);
+pub const HOVERED_PRESSED_BUTTON: Color = Color::rgb(0.25, 0.65, 0.25);
+pub const PRESSED_BUTTON: Color = Color::rgb(0.35, 0.75, 0.35);
 
 struct ButtonParams {
     text: &'static str,
@@ -36,7 +19,6 @@ struct ButtonParams {
     icon_path: &'static str,
     action: MenuButtonAction,
 }
-
 pub struct MenuPlugin;
 
 impl Plugin for MenuPlugin{
@@ -44,15 +26,28 @@ impl Plugin for MenuPlugin{
         app
             // Systems to handle the main menu screen
             .add_systems(OnEnter(MenuState::Main), main_menu_setup)
-            // Systems to despawn main menu
             .add_systems(OnExit(MenuState::Main), despawn_screen::<OnMainMenuScreen>)
+            // Systems to handle the settings menu screen
+            .add_systems(OnEnter(MenuState::Settings), settings_menu_setup)
+            .add_systems(OnExit(MenuState::Settings),despawn_screen::<OnSettingsMenuScreen>)
+            // Systems to handle the display settings screen
+            .add_systems(OnEnter(MenuState::SettingsDisplay),display_settings_menu_setup)
+            .add_systems(Update,setting_button::<DisplaySize>.run_if(in_state(MenuState::SettingsDisplay)))
+            .add_systems(OnExit(MenuState::SettingsDisplay),despawn_screen::<OnDisplaySettingsMenuScreen>)
+            // Systems to handle the sound settings screen
+            .add_systems(OnEnter(MenuState::SettingsSound), sound_settings_menu_setup)
+            .add_systems(Update,setting_button::<SoundVolume>.run_if(in_state(MenuState::SettingsSound)))
+            .add_systems(OnExit(MenuState::SettingsSound),despawn_screen::<OnSoundSettingsMenuScreen>)
+            // Systems to adjust Audio volume
+            .add_systems(Update, toggle_volume)
+            // Systems to adjust screen resolution
+            .add_systems(Update, toggle_resolution)
             // Common systems to all screens that handles buttons behavior
-            .add_systems(
-                Update,
-                (menu_action, button_system).run_if(in_state(PlayingState::NotPlaying)),
-            );
+            .add_systems(Update,(menu_action, button_system).run_if(in_state(PlayingState::NotPlaying)));
+            
     }
 }
+
 fn main_menu_setup(
     mut commands: Commands,
     asset_server: Res<AssetServer>
@@ -65,8 +60,8 @@ fn main_menu_setup(
             action: MenuButtonAction::Play,
         },
         ButtonParams {
-            text: "!Settings!",
-            text_color: Color::rgb(244.0, 0.0, 9.0),
+            text: "Settings",
+            text_color: TEXT_COLOR,
             icon_path: "texture/icons/wrench.png",
             action: MenuButtonAction::Settings,
         },
@@ -132,6 +127,92 @@ fn main_menu_setup(
         });
 }
 
+// This system updates the settings when a new value for a setting is selected, 
+// and marks the button as the one currently selected
+fn setting_button<T: Resource + Component + PartialEq + Copy>(
+    interaction_query: Query<(&Interaction, &T, Entity), (Changed<Interaction>, With<Button>)>,
+    mut selected_query: Query<(Entity, &mut BackgroundColor), With<SelectedOption>>,
+    mut commands: Commands,
+    mut setting: ResMut<T>,
+) {
+    for (interaction, button_setting, entity) in &interaction_query {
+        if *interaction == Interaction::Pressed && *setting != *button_setting {
+            let (previous_button, mut previous_color) = selected_query.single_mut();
+            *previous_color = NORMAL_BUTTON.into();
+            commands.entity(previous_button).remove::<SelectedOption>();
+            commands.entity(entity).insert(SelectedOption);
+            *setting = *button_setting;
+        }
+    }
+}
+
+fn settings_menu_setup(mut commands: Commands) {
+    let button_style = Style {
+        width: Val::Px(200.0),
+        height: Val::Px(65.0),
+        margin: UiRect::all(Val::Px(20.0)),
+        justify_content: JustifyContent::Center,
+        align_items: AlignItems::Center,
+        ..default()
+    };
+
+    let button_text_style = TextStyle {
+        font_size: 40.0,
+        color: TEXT_COLOR,
+        ..default()
+    };
+
+    commands
+        .spawn((
+            NodeBundle {
+                style: Style {
+                    width: Val::Percent(100.0),
+                    height: Val::Percent(100.0),
+                    align_items: AlignItems::Center,
+                    justify_content: JustifyContent::Center,
+                    ..default()
+                },
+                ..default()
+            },
+            OnSettingsMenuScreen,
+        ))
+        .with_children(|parent| {
+            parent
+                .spawn(NodeBundle {
+                    style: Style {
+                        flex_direction: FlexDirection::Column,
+                        align_items: AlignItems::Center,
+                        ..default()
+                    },
+                    background_color: Color::CRIMSON.into(),
+                    ..default()
+                })
+                .with_children(|parent| {
+                    for (action, text) in [
+                        (MenuButtonAction::SettingsDisplay, "Display"),
+                        (MenuButtonAction::SettingsSound, "Sound"),
+                        (MenuButtonAction::BackToMainMenu, "Back"),
+                    ] {
+                        parent
+                            .spawn((
+                                ButtonBundle {
+                                    style: button_style.clone(),
+                                    background_color: NORMAL_BUTTON.into(),
+                                    ..default()
+                                },
+                                action,
+                            ))
+                            .with_children(|parent| {
+                                parent.spawn(TextBundle::from_section(
+                                    text,
+                                    button_text_style.clone(),
+                                ));
+                            });
+                    }
+                });
+        });
+}
+
 // This system handles changing all buttons color based on mouse interaction
 fn button_system(
     mut interaction_query: Query<
@@ -170,15 +251,13 @@ fn menu_action(
                     playing_state.set(PlayingState::Local);
                     menu_state.set(MenuState::Disabled);
                 }
-                //setting button interaction disable currently!!!
-                MenuButtonAction::Settings => menu_state.set(MenuState::Main),
+                MenuButtonAction::Settings => menu_state.set(MenuState::Settings),
                 MenuButtonAction::SettingsDisplay => {
-                    menu_state.set(MenuState::Main);
+                    menu_state.set(MenuState::SettingsDisplay);
                 }
                 MenuButtonAction::SettingsSound => {
-                    menu_state.set(MenuState::Main);
+                    menu_state.set(MenuState::SettingsSound);
                 }
-                //setting button interaction disable currently!!!
                 MenuButtonAction::BackToMainMenu => menu_state.set(MenuState::Main),
                 MenuButtonAction::BackToSettings => {
                     menu_state.set(MenuState::Settings);

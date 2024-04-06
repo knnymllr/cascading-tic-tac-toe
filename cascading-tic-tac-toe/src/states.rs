@@ -1,4 +1,4 @@
-use bevy::prelude::{Reflect, States};
+use bevy::prelude::*;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash, States, Reflect)]
 pub enum Player {
