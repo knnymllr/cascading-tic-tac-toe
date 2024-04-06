@@ -1,9 +1,11 @@
 use bevy::prelude::*;
 use bevy_kira_audio::prelude::*;
+use std::borrow::BorrowMut;
 
-use crate::{
-    CellState, GameScreenTag, GameState, GridCell, Player, PlayerTurn, RoundCount, StateWrapper,
-};
+use crate::{CellState, GameScreenTag, GameState, GridCell, Player, PlayerTurn, RoundCount, StateWrapper};
+use crate::ui_components::bundles::{button_bundle, text_bundle};
+use crate::theme::theme::UiTheme;
+use crate::utils::modify_text::modify_text;
 
 /// Event triggered when a cell is clicked
 #[derive(Event)]
@@ -11,43 +13,19 @@ pub struct CellClickedEvent {
     entity: Entity,
 }
 
-/// Resource containing UI theme settings
-#[derive(Resource)]
-pub struct UiTheme {
-    pub root: BackgroundColor,
-    pub border: BackgroundColor,
-    pub menu: BackgroundColor,
-    pub button: BackgroundColor,
-    pub button_hovered: BackgroundColor,
-    pub button_pressed: BackgroundColor,
-    pub button_text: Color,
-}
-
-impl FromWorld for UiTheme {
-    fn from_world(_: &mut World) -> Self {
-        UiTheme {
-            root: Color::NONE.into(),
-            border: Color::rgb(0.65, 0.65, 0.65).into(),
-            menu: Color::rgb(0.15, 0.15, 0.15).into(),
-            button: Color::rgb(0.15, 0.15, 0.15).into(),
-            button_hovered: Color::rgb(0.35, 0.75, 0.35).into(),
-            button_pressed: Color::rgb(0.35, 0.75, 0.35).into(),
-            button_text: Color::WHITE,
-        }
-    }
-}
-
 /// System for handling board cell interaction
 pub fn board_cell_interaction_system(
     theme: Res<UiTheme>,
+    player_turn: ResMut<State<PlayerTurn>>,
     mut send_cell_clicked: EventWriter<CellClickedEvent>,
     mut buttons: Query<
-        (&Interaction, &mut BackgroundColor, &GridCell, Entity),
+        (&Interaction, &mut BackgroundColor, &GridCell, Entity, &Children),
         (Changed<Interaction>, With<Button>),
     >,
+    mut cell_text_query: Query<&mut Text>,
     game_state: ResMut<State<GameState>>,
 ) {
-    for (interaction, mut color, cell, entity) in buttons.iter_mut() {
+    for (interaction, mut color, cell, entity, children) in buttons.iter_mut() {
         if cell.state != CellState::Valid || game_state.clone() != GameState::GameOngoing {
             return;
         }
@@ -57,14 +35,36 @@ pub fn board_cell_interaction_system(
                 send_cell_clicked.send(CellClickedEvent { entity });
                 *color = theme.button;
             }
-            Interaction::Hovered => *color = theme.button_hovered,
-            Interaction::None => *color = theme.button,
+            Interaction::Hovered => {
+                *color = theme.button_hovered;
+
+                let text = match player_turn.clone() {
+                    PlayerTurn::X => "X",
+                    PlayerTurn::O => "O",
+                };
+                modify_text(
+                    children,
+                    cell_text_query.borrow_mut(),
+                    text.to_string(),
+                    (None, None, Some(theme.button_text_hovered))
+                );
+            },
+            Interaction::None => {
+                *color = theme.button;
+                modify_text(
+                    children,
+                    cell_text_query.borrow_mut(),
+                    "".to_string(),
+                    (None, None, Some(theme.button_text_hovered))
+                );
+            },
         }
     }
 }
 
 /// System for handling cell click events
 pub fn on_cell_clicked(
+    theme: Res<UiTheme>,
     mut events: EventReader<CellClickedEvent>,
     mut cell_query: Query<(&mut GridCell, &Children)>,
     mut cell_text_query: Query<&mut Text>,
@@ -87,7 +87,7 @@ pub fn on_cell_clicked(
 
         audio.play(movement_sound.clone());
         update_cell_state(&mut cell, &player_turn_state.get());
-        update_cell_text(&mut cell_text_query, children, &player_turn_state.get());
+        update_cell_text(&theme, &mut cell_text_query, children, &player_turn_state.get());
         update_player_turn(&mut state);
     }
 }
@@ -102,6 +102,7 @@ fn update_cell_state(cell: &mut Mut<GridCell>, player_turn: &PlayerTurn) {
 
 /// Updates the text of the clicked cell based on the current player turn
 fn update_cell_text(
+    theme: &Res<UiTheme>,
     cell_text_query: &mut Query<&mut Text>,
     children: &Children,
     player_turn: &PlayerTurn,
@@ -111,11 +112,12 @@ fn update_cell_text(
         PlayerTurn::O => "O",
     };
 
-    for child in children.iter() {
-        if let Ok(mut cell_text) = cell_text_query.get_mut(*child) {
-            cell_text.sections[0].value = text.to_string();
-        }
-    }
+    modify_text(
+        children,
+        cell_text_query.borrow_mut(),
+        text.to_string(),
+        (None, None, Some(theme.button_text))
+    );
 }
 
 /// Updates the player turn state to the next player
@@ -219,47 +221,6 @@ pub fn menu_background(theme: &Res<UiTheme>) -> NodeBundle {
     }
 }
 
-pub fn button(theme: &Res<UiTheme>) -> ButtonBundle {
-    // Define the button bundle with styles and properties
-    ButtonBundle {
-        style: Style {
-            // Set the width to 100% of the parent's width
-            width: Val::Percent(100.0),
-            // Set the height to 100% of the parent's height
-            height: Val::Percent(100.0),
-            // Justify content to the center
-            justify_content: JustifyContent::Center,
-            // Align items to the center
-            align_items: AlignItems::Center,
-            ..Default::default()
-        },
-        // Set the background color of the button to the button color defined in the theme
-        background_color: theme.button,
-        ..Default::default()
-    }
-}
-
-pub fn button_text(
-    asset_server: &Res<AssetServer>,
-    theme: &Res<UiTheme>,
-    label: &str,
-) -> TextBundle {
-    // Define the text bundle with styles and properties
-    TextBundle {
-        text: Text::from_section(
-            label,
-            TextStyle {
-                // Load the FiraSans-Bold font from the asset server
-                font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                // Set the font size to 30 pixels
-                font_size: 30.0,
-                // Set the color of the text to the button text color defined in the theme
-                color: theme.button_text,
-            },
-        ),
-        ..Default::default()
-    }
-}
 
 fn generate_invalid_cells(n: u32, list: &mut Vec<u32>) {
     let cols = n + 3;
@@ -313,10 +274,13 @@ pub fn setup_board(
                                 parent.spawn(square_border(&theme)).with_children(|parent| {
                                     // Spawn the button node with children
                                     parent
-                                        .spawn(button(&theme))
+                                        .spawn(button_bundle(
+                                            (Val::Percent(100.0), Val::Percent(100.0), None, JustifyContent::Center, AlignItems::Center),
+                                            theme.button
+                                        ))
                                         .with_children(|parent| {
                                             // Spawn the button text node
-                                            parent.spawn(button_text(&asset_server, &theme, "-"));
+                                            parent.spawn(text_bundle("-", &asset_server, (30.0, theme.button_text)));
                                         })
                                         // Insert the GridCell component
                                         .insert(GridCell {
@@ -329,10 +293,13 @@ pub fn setup_board(
                                 parent.spawn(square_border(&theme)).with_children(|parent| {
                                     // Spawn the button node with children
                                     parent
-                                        .spawn(button(&theme))
+                                        .spawn(button_bundle(
+                                            (Val::Percent(100.0), Val::Percent(100.0), None, JustifyContent::Center, AlignItems::Center),
+                                            theme.button
+                                        ))
                                         .with_children(|parent| {
                                             // Spawn the button text node
-                                            parent.spawn(button_text(&asset_server, &theme, ""));
+                                            parent.spawn(text_bundle("", &asset_server, (30.0, theme.button_text)));
                                         })
                                         // Insert the GridCell component
                                         .insert(GridCell {

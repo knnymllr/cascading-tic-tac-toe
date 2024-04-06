@@ -1,5 +1,12 @@
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+
+use crate::theme::theme::UiTheme;
+use std::io::Cursor;
 use bevy_kira_audio::prelude::*;
 use bevy::prelude::*;
+use bevy::window::PrimaryWindow;
+use bevy::winit::WinitWindows;
+use winit::window::Icon;
 
 pub use menus::*;
 pub use states::*;
@@ -21,7 +28,21 @@ mod board;
 mod menus;
 mod game_screen;
 
+mod ui_components {
+    pub mod bundles;
+}
+
+mod theme {
+    pub mod theme;
+}
+
+mod utils {
+    pub mod modify_text;
+    pub mod despawn_screen;
+}
+
 fn main() {
+
     let mut app = App::new();
     app.add_plugins(DefaultPlugins.set(WindowPlugin {
         primary_window: Some(Window {
@@ -46,7 +67,7 @@ fn main() {
     .add_plugins(WinningLogicPlugin)
     .add_plugins(main_menu::MenuPlugin)
     .add_plugins(GameScreen)
-    .add_systems(Startup, start_background_audio)
+    .add_systems(Startup, (place_camera, set_window_icon, start_background_audio))
     .run();
 }
 
@@ -58,4 +79,23 @@ fn start_background_audio(asset_server: Res<AssetServer>, mut commands: Commands
         },
         MyMusic,
     ));
+    
+}
+fn set_window_icon(windows: NonSend<WinitWindows>, primary_window: Query<Entity, With<PrimaryWindow>>) {
+
+    let primary_entity = primary_window.single();
+    let Some(primary) = windows.get_window(primary_entity) else { return };
+    let icon_buf = Cursor::new(include_bytes!("../assets/texture/icons/icon.png"));
+
+    if let Ok(image) = image::load(icon_buf, image::ImageFormat::Png) {
+        let image = image.into_rgba8();
+        let (width, height) = image.dimensions();
+        let rgba = image.into_raw();
+        let icon = Icon::from_rgba(rgba, width, height).unwrap();
+        primary.set_window_icon(Some(icon));
+    };
+}
+
+fn place_camera(mut commands: Commands) {
+    commands.spawn(Camera2dBundle::default());
 }

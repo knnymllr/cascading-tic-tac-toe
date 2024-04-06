@@ -1,7 +1,10 @@
 use bevy::{app::AppExit, prelude::*};
-use crate::{GameState, MainCamera, MenuState, PlayingState,OnMainMenuScreen,OnSettingsMenuScreen,
-    OnDisplaySettingsMenuScreen,CameraMenu,MenuButtonAction,SelectedOption,SoundVolume,OnSoundSettingsMenuScreen,
+use crate::{GameState, MenuState, PlayingState,OnMainMenuScreen,OnSettingsMenuScreen,
+    OnDisplaySettingsMenuScreen,MenuButtonAction,SelectedOption,SoundVolume,OnSoundSettingsMenuScreen,
     display_menu::*,sound_menu::*,DisplaySize};
+
+use crate::ui_components::bundles::{button_bundle, image_bundle, text_bundle};
+use crate::utils::despawn_screen::despawn_screen;
 
 //colors
 pub const TEXT_COLOR: Color = Color::rgb(0.9, 0.9, 0.9);
@@ -9,6 +12,13 @@ pub const NORMAL_BUTTON: Color = Color::rgb(0.15, 0.15, 0.15);
 pub const HOVERED_BUTTON: Color = Color::rgb(0.25, 0.25, 0.25);
 pub const HOVERED_PRESSED_BUTTON: Color = Color::rgb(0.25, 0.65, 0.25);
 pub const PRESSED_BUTTON: Color = Color::rgb(0.35, 0.75, 0.35);
+
+struct ButtonParams {
+    text: &'static str,
+    text_color: Color,
+    icon_path: &'static str,
+    action: MenuButtonAction,
+}
 pub struct MenuPlugin;
 
 impl Plugin for MenuPlugin{
@@ -39,42 +49,29 @@ impl Plugin for MenuPlugin{
 }
 
 fn main_menu_setup(
-    mut cam: ResMut<MainCamera>,
     mut commands: Commands,
     asset_server: Res<AssetServer>
 ) {
-
-    if !cam.id.is_some() {
-        cam.id = Option::from(commands.spawn((Camera2dBundle::default(), CameraMenu)).id());
-    }
-
-    // Common style for all buttons on the screen
-    let button_style = Style {
-        width: Val::Px(250.0),
-        height: Val::Px(65.0),
-        margin: UiRect::all(Val::Px(20.0)),
-        justify_content: JustifyContent::Center,
-        align_items: AlignItems::Center,
-        ..default()
-    };
-    let button_icon_style = Style {
-        width: Val::Px(30.0),
-        // This takes the icons out of the flexbox flow, to be positioned exactly
-        position_type: PositionType::Absolute,
-        // The icon will be close to the left border of the button
-        left: Val::Px(10.0),
-        ..default()
-    };
-    let button_text_style = TextStyle {
-        font_size: 40.0,
-        color: TEXT_COLOR,
-        ..default()
-    };
-    // let button_text_style_disable = TextStyle {
-    //     font_size: 30.0,
-    //     color: Color::rgb(244.0, 0.0, 9.0),
-    //     ..default()
-    // };
+    let buttons = vec![
+        ButtonParams {
+            text: "New Game",
+            text_color: TEXT_COLOR,
+            icon_path: "texture/icons/right-arrow.png",
+            action: MenuButtonAction::Play,
+        },
+        ButtonParams {
+            text: "Settings",
+            text_color: TEXT_COLOR,
+            icon_path: "texture/icons/wrench.png",
+            action: MenuButtonAction::Settings,
+        },
+        ButtonParams {
+            text: "Quit",
+            text_color: TEXT_COLOR,
+            icon_path: "texture/icons/exit.png",
+            action: MenuButtonAction::Quit,
+        },
+    ];
 
     commands
         .spawn((
@@ -103,15 +100,7 @@ fn main_menu_setup(
                 })
                 .with_children(|parent| {
                     // Display the game name
-                    parent.spawn(
-                        TextBundle::from_section(
-                            "Cascading Tic-Tac-Toe",
-                            TextStyle {
-                                font_size: 80.0,
-                                color: TEXT_COLOR,
-                                ..default()
-                            },
-                        )
+                    parent.spawn(text_bundle("Cascading Tic-Tac-Toe", &asset_server, (80.0, TEXT_COLOR))
                         .with_style(Style {
                             margin: UiRect::all(Val::Px(50.0)),
                             ..default()
@@ -119,70 +108,21 @@ fn main_menu_setup(
                     );
 
                     // Display three buttons for each action available from the main menu:
-                    // - new game
-                    // - settings
-                    // - quit
-                    parent
-                        .spawn((
-                            ButtonBundle {
-                                style: button_style.clone(),
-                                background_color: NORMAL_BUTTON.into(),
-                                ..default()
-                            },
-                            MenuButtonAction::Play,
-                        ))
-                        .with_children(|parent| {
-                            let icon = asset_server.load("texture/icons/right-arrow.png");
-                            parent.spawn(ImageBundle {
-                                style: button_icon_style.clone(),
-                                image: UiImage::new(icon),
-                                ..default()
+                    for params in buttons {
+                        parent
+                            .spawn((
+                                button_bundle(
+                                    (Val::Px(250.0), Val::Px(65.0), Option::from(UiRect::all(Val::Px(20.0))), JustifyContent::Center, AlignItems::Center),
+                                    NORMAL_BUTTON.into()
+                                ),
+                                params.action,
+                            ))
+                            .with_children(|parent| {
+                                let icon = asset_server.load(params.icon_path);
+                                parent.spawn(image_bundle(UiImage::new(icon)));
+                                parent.spawn(text_bundle(params.text, &asset_server, (40.0, params.text_color)));
                             });
-                            parent.spawn(TextBundle::from_section(
-                                "New Game",
-                                button_text_style.clone(),
-                            ));
-                        });
-                    parent
-                        .spawn((
-                            ButtonBundle {
-                                style: button_style.clone(),
-                                background_color: NORMAL_BUTTON.into(),
-                                ..default()
-                            },
-                            MenuButtonAction::Settings,
-                        ))
-                        .with_children(|parent| {
-                            let icon = asset_server.load("texture/icons/wrench.png");
-                            parent.spawn(ImageBundle {
-                                style: button_icon_style.clone(),
-                                image: UiImage::new(icon),
-                                ..default()
-                            });
-                            parent.spawn(TextBundle::from_section(
-                                "Settings",
-                                button_text_style.clone(),
-                                
-                            ));
-                        });
-                    parent
-                        .spawn((
-                            ButtonBundle {
-                                style: button_style,
-                                background_color: NORMAL_BUTTON.into(),
-                                ..default()
-                            },
-                            MenuButtonAction::Quit,
-                        ))
-                        .with_children(|parent| {
-                            let icon = asset_server.load("texture/icons/exit.png");
-                            parent.spawn(ImageBundle {
-                                style: button_icon_style,
-                                image: UiImage::new(icon),
-                                ..default()
-                            });
-                            parent.spawn(TextBundle::from_section("Quit", button_text_style));
-                        });
+                    }
                 });
         });
 }
@@ -327,9 +267,3 @@ fn menu_action(
     }
 }
 
-// Generic system that takes a component as a parameter, and will despawn all entities with that component
-pub fn despawn_screen<T: Component>(to_despawn: Query<Entity, With<T>>, mut commands: Commands) {
-    for entity in &to_despawn {
-        commands.entity(entity).despawn_recursive();
-    }
-}
