@@ -19,6 +19,11 @@ pub struct GridCell {
     pub state: CellState,    // TicTacToeCell component associated with the grid cell
 }
 
+#[derive(Component)]
+pub struct Player {
+    pub score: u32,
+}
+
 /// Wrapper for managing state transitions
 #[derive(Debug)]
 pub struct StateWrapper<'w, T: States> {

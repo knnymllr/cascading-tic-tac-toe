@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use crate::{DisplaySize,SelectedOption,MenuButtonAction,OnDisplaySettingsMenuScreen,ResolutionSettings,main_menu::*};
+use crate::{DisplaySize, SelectedOption, MenuButtonAction, OnDisplaySettingsMenuScreen, ResolutionSettings, main_menu::*};
 
 
 pub fn display_settings_menu_setup(mut commands: Commands, display_quality: Res<DisplaySize>) {

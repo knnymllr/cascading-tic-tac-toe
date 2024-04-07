@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{CellState, GameState, GridCell, Player, RoundCount};
+use crate::{CellState, GameState, GridCell, PlayerTag, RoundInit};
 /// Plugin for handling winning logic in tic-tac-toe game
 pub struct WinningLogicPlugin;
 
@@ -18,11 +18,10 @@ impl Plugin for WinningLogicPlugin {
 pub fn is_game_over(
     cells_query: Query<&GridCell>,
     mut update_winner: ResMut<NextState<GameState>>,
-    // mut round_count: ResMut<RoundCount>,
-    round_count: ResMut<RoundCount>,
+    round_init: ResMut<RoundInit>,
 ) {
     // Collect the states of all cells into a vector
-    let n = round_count.get_current();
+    let n = round_init.round_count;
     let grid_size = (2 * n + 3) * (n + 3);
 
     let mut cells = vec![CellState::Valid; grid_size as usize];
@@ -31,12 +30,12 @@ pub fn is_game_over(
     }
 
     // Check if player X has won
-    if is_winner(&cells, n, Player::X) {
-        update_winner.set(GameState::Won(Player::X))
+    if is_winner(&cells, n, PlayerTag::X) {
+        update_winner.set(GameState::Won(PlayerTag::X))
     }
     // Check if player O has won
-    if is_winner(&cells, n, Player::O) {
-        update_winner.set(GameState::Won(Player::O))
+    if is_winner(&cells, n, PlayerTag::O) {
+        update_winner.set(GameState::Won(PlayerTag::O))
     }
     // Check if the game is a draw
     if is_draw(&cells) {
@@ -45,7 +44,7 @@ pub fn is_game_over(
 }
 
 /// Check if a player has won
-fn is_winner(cells: &Vec<CellState>, n: u32, player: Player) -> bool {
+fn is_winner(cells: &Vec<CellState>, n: u32, player: PlayerTag) -> bool {
     let state = CellState::Filled(player);
 
     let mut winning_combinations: Vec<[(u32, u32); 3]> = Vec::new();
@@ -71,8 +70,8 @@ fn is_winner(cells: &Vec<CellState>, n: u32, player: Player) -> bool {
     return false;
 }
 
-fn generate_winning_combinations(round_count: u32, winners: &mut Vec<[(u32, u32); 3]>) {
-    for n in 0..=round_count {
+fn generate_winning_combinations(round_init: u32, winners: &mut Vec<[(u32, u32); 3]>) {
+    for n in 0..=round_init {
         // horizontal
         winners.push([(2*n, n), (2*n, n+1), (2*n, n+2)]);
         winners.push([(2*n+1, n), (2*n+1, n+1), (2*n+1, n+2)]);
@@ -116,8 +115,8 @@ mod tests {
     use test_case::test_case;
 
     /// Test cases for the `is_draw` function
-    #[test_case(vec![CellState::Filled(Player::X), CellState::Filled(Player::O)], true)]
-    #[test_case(vec![CellState::Filled(Player::X), CellState::Valid], false)]
+    #[test_case(vec![CellState::Filled(PlayerTag::X), CellState::Filled(PlayerTag::O)], true)]
+    #[test_case(vec![CellState::Filled(PlayerTag::X), CellState::Valid], false)]
     fn test_is_draw(input: Vec<CellState>, expected: bool) {
         assert_eq!(is_draw(&input), expected);
     }

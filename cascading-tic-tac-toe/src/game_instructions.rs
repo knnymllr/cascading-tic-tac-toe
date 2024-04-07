@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{GameScreenTag, GameState, Player, PlayerTurn};
+use crate::{GameScreenTag, GameState, PlayerTag, PlayerTurn};
 use crate::theme::theme::UiTheme;
 
 #[derive(Component)]
@@ -73,8 +73,8 @@ pub fn update_instruction_on_state_change(
         let mut ui_text = instructions.single_mut();
 
         match game_state.get() {
-            &GameState::Won(Player::X) => ui_text.sections[0].value = "X Won!!!".to_string(),
-            &GameState::Won(Player::O) => ui_text.sections[0].value = "O Won!!!".to_string(),
+            &GameState::Won(PlayerTag::X) => ui_text.sections[0].value = "X Won!!!".to_string(),
+            &GameState::Won(PlayerTag::O) => ui_text.sections[0].value = "O Won!!!".to_string(),
             &GameState::Draw => ui_text.sections[0].value = "Draw :-(".to_string(),
             &GameState::GameOngoing => (),
         }
