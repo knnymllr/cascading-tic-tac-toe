@@ -59,8 +59,7 @@ pub fn spawn_scores_text(mut commands: Commands, theme: Res<UiTheme>, asset_serv
     });
 }
 
-
-// // System to update the game instructions based on state changes
+// // System to update score text on state change
 // pub fn update_scores_on_state_change(
 //     player_turn_state: Res<State<PlayerTurn>>,
 //     game_state: Res<State<GameState>>,

@@ -51,20 +51,43 @@ pub fn is_game_over(
     }
 }
 
-fn has_two_tuples(game_combinations: &mut Vec<[(u32, u32);3]>, winning_combination: &[(u32, u32); 3]) -> bool {
+fn has_two_tuples(
+    game_combinations: &mut Vec<[(u32, u32); 3]>,
+    winning_combination: &[(u32, u32); 3],
+) -> bool {
     for combination in game_combinations {
-      let mut count = 0;
-      for tuple in winning_combination {
-        if combination.iter().any(|comb_tuple| *comb_tuple == *tuple) {
-          count += 1;
-          if count >= 2 {
-            return true;
-          }
+        let mut count = 0;
+        for tuple in winning_combination {
+            if combination.iter().any(|comb_tuple| *comb_tuple == *tuple) {
+                count += 1;
+                if count >= 2 {
+                    return true;
+                }
+            }
         }
-      }
     }
     false
-  }
+}
+
+fn is_opposite(
+    game_combinations: &mut Vec<[(u32, u32); 3]>,
+    winning_combination: &[(u32, u32); 3],
+) -> bool {
+    for combination in game_combinations {
+        for tuple in winning_combination {
+            if combination.iter().any(|comb_tuple| *comb_tuple == *tuple) {
+                if has_opposite(combination, winning_combination, tuple) {
+                    return true; 
+                }
+            }
+        }
+    }
+    false
+}
+
+fn has_opposite(combination: &[(u32, u32); 3], proposed: &[(u32, u32); 3], common_tuple: &(u32,u32)) -> bool {
+    false
+}
 
 /// Check if a player has won
 fn is_winner(
@@ -81,7 +104,10 @@ fn is_winner(
     for winning_combination in winning_combinations {
         let mut all_match = true;
 
-        if has_two_tuples(game_combinations, &winning_combination) {
+        if game_combinations.contains(&winning_combination)
+            || has_two_tuples(game_combinations, &winning_combination)
+            || is_opposite(game_combinations, &winning_combination)
+        {
             continue; // Skip to the next combination
         }
 
