@@ -1,7 +1,6 @@
 use bevy::app::{App, Plugin, Update};
 use bevy::prelude::{Component, in_state, IntoSystemConfigs, NextState, OnEnter, ResMut};
-
-use crate::{board_cell_interaction_system, button_interactions, MenuState, on_cell_clicked, PlayerTurn, PlayingState, setup_board, setup_instructions, setup_menu_button, update_instruction_on_state_change};
+use crate::{board_cell_interaction_system, button_interactions, MenuState, on_cell_clicked, PlayerTurn, PlayingState, setup_board, setup_instructions, spawn_scores_text, setup_menu_button, update_instruction_on_state_change};
 use crate::utils::despawn_screen::despawn_screen;
 
 #[derive(Component)]
@@ -14,7 +13,7 @@ impl Plugin for GameScreen {
         app.add_event::<crate::CellClickedEvent>()
 
             // setup
-            .add_systems(OnEnter(PlayingState::Local), (setup_board, setup_menu_button, setup_instructions, select_player))
+            .add_systems(OnEnter(PlayingState::Local), (setup_board, setup_menu_button, setup_instructions, spawn_scores_text, select_player))
 
             // interactions
             .add_systems(Update, (
@@ -28,6 +27,7 @@ impl Plugin for GameScreen {
             .add_systems(OnEnter(MenuState::Main), despawn_screen::<GameScreenTag>);
     }
 }
+
 
 /// selects which player goes first
 fn select_player(mut next_player_turn: ResMut<NextState<PlayerTurn>>) {

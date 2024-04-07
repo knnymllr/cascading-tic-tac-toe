@@ -18,7 +18,7 @@ impl Plugin for WinningLogicPlugin {
 pub fn is_game_over(
     cells_query: Query<&GridCell>,
     mut update_winner: ResMut<NextState<GameState>>,
-    round_init: ResMut<RoundInit>,
+    mut round_init: ResMut<RoundInit>,
 ) {
     // Collect the states of all cells into a vector
     let n = round_init.round_count;
@@ -30,21 +30,34 @@ pub fn is_game_over(
     }
 
     // Check if player X has won
-    if is_winner(&cells, n, PlayerTag::X) {
-        update_winner.set(GameState::Won(PlayerTag::X))
+    if is_winner(&cells, n, PlayerTag::X, &mut round_init.game_combinations) {
+        round_init.x_score += 1;
     }
     // Check if player O has won
-    if is_winner(&cells, n, PlayerTag::O) {
-        update_winner.set(GameState::Won(PlayerTag::O))
+    if is_winner(&cells, n, PlayerTag::O, &mut round_init.game_combinations) {
+        round_init.o_score += 1;
     }
     // Check if the game is a draw
     if is_draw(&cells) {
         update_winner.set(GameState::Draw)
     }
+
+    if round_init.x_score >= round_init.target {
+        update_winner.set(GameState::Won(PlayerTag::X))
+    }
+
+    if round_init.o_score >= round_init.target {
+        update_winner.set(GameState::Won(PlayerTag::O))
+    }
 }
 
 /// Check if a player has won
-fn is_winner(cells: &Vec<CellState>, n: u32, player: PlayerTag) -> bool {
+fn is_winner(
+    cells: &Vec<CellState>,
+    n: u32,
+    player: PlayerTag,
+    game_combinations: &mut Vec<[(u32, u32); 3]>,
+) -> bool {
     let state = CellState::Filled(player);
 
     let mut winning_combinations: Vec<[(u32, u32); 3]> = Vec::new();
@@ -52,6 +65,10 @@ fn is_winner(cells: &Vec<CellState>, n: u32, player: PlayerTag) -> bool {
     // Iterate over all winning combinations
     for winning_combination in winning_combinations {
         let mut all_match = true;
+
+        if game_combinations.contains(&winning_combination) {
+            continue; // Skip to the next combination
+        }
 
         for cell in winning_combination.iter() {
             let index = get_index(cell.0, cell.1, n + 3);
@@ -63,6 +80,7 @@ fn is_winner(cells: &Vec<CellState>, n: u32, player: PlayerTag) -> bool {
         }
 
         if all_match {
+            game_combinations.push(winning_combination);
             return true;
         }
     }
@@ -73,25 +91,24 @@ fn is_winner(cells: &Vec<CellState>, n: u32, player: PlayerTag) -> bool {
 fn generate_winning_combinations(round_init: u32, winners: &mut Vec<[(u32, u32); 3]>) {
     for n in 0..=round_init {
         // horizontal
-        winners.push([(2*n, n), (2*n, n+1), (2*n, n+2)]);
-        winners.push([(2*n+1, n), (2*n+1, n+1), (2*n+1, n+2)]);
-        winners.push([(2*n+2, n), (2*n+2, n+1), (2*n+2, n+2)]);
+        winners.push([(2 * n, n), (2 * n, n + 1), (2 * n, n + 2)]);
+        winners.push([(2 * n + 1, n), (2 * n + 1, n + 1), (2 * n + 1, n + 2)]);
+        winners.push([(2 * n + 2, n), (2 * n + 2, n + 1), (2 * n + 2, n + 2)]);
         // vertical
-        winners.push([(2*n, n), (2*n+1, n), (2*n+2, n)]);
-        winners.push([(2*n, n+1), (2*n+1, n+1), (2*n+2, n+1)]);
-        winners.push([(2*n, n+2), (2*n+1, n+2), (2*n+2, n+2)]);
+        winners.push([(2 * n, n), (2 * n + 1, n), (2 * n + 2, n)]);
+        winners.push([(2 * n, n + 1), (2 * n + 1, n + 1), (2 * n + 2, n + 1)]);
+        winners.push([(2 * n, n + 2), (2 * n + 1, n + 2), (2 * n + 2, n + 2)]);
         // diagonals
-        winners.push([(2*n, n), (2*n+1, n+1), (2*n+2, n+2)]);
-        winners.push([(2*n, n+2), (2*n+1, n+1), (2*n+2, n)]);
+        winners.push([(2 * n, n), (2 * n + 1, n + 1), (2 * n + 2, n + 2)]);
+        winners.push([(2 * n, n + 2), (2 * n + 1, n + 1), (2 * n + 2, n)]);
         if n > 0 {
             // reach-back
-            winners.push([(2*n-2, n), (2*n-1, n+1), (2*n, n+2)]);
-            winners.push([(2*n-1, n), (2*n, n+1), (2*n+1, n+2)]);
-            winners.push([(2*n-1, n-1), (2*n, n), (2*n+1, n+1)]);
-            winners.push([(2*n, n-1), (2*n+1, n), (2*n+2, n+1)]);
-            winners.push([(2*n-1, n), (2*n, n), (2*n+1, n)]);
-            winners.push([(2*n-1, n+1), (2*n, n+1), (2*n+1, n+1)]);
-            
+            winners.push([(2 * n - 2, n), (2 * n - 1, n + 1), (2 * n, n + 2)]);
+            winners.push([(2 * n - 1, n), (2 * n, n + 1), (2 * n + 1, n + 2)]);
+            winners.push([(2 * n - 1, n - 1), (2 * n, n), (2 * n + 1, n + 1)]);
+            winners.push([(2 * n, n - 1), (2 * n + 1, n), (2 * n + 2, n + 1)]);
+            winners.push([(2 * n - 1, n), (2 * n, n), (2 * n + 1, n)]);
+            winners.push([(2 * n - 1, n + 1), (2 * n, n + 1), (2 * n + 1, n + 1)]);
         }
     }
 }

@@ -2,10 +2,13 @@ use bevy::prelude::*;
 use bevy_kira_audio::prelude::*;
 use std::borrow::BorrowMut;
 
-use crate::{CellState, GameScreenTag, GameState, GridCell, PlayerTag, PlayerTurn, RoundInit, StateWrapper};
-use crate::ui_components::bundles::{button_bundle, text_bundle};
 use crate::theme::theme::UiTheme;
+use crate::ui_components::bundles::{button_bundle, text_bundle};
 use crate::utils::modify_text::modify_text;
+use crate::{
+    CellState, GameScreenTag, GameState, GridCell, PlayerTag, PlayerTurn, RoundInit,
+    StateWrapper,
+};
 
 /// Event triggered when a cell is clicked
 #[derive(Event)]
@@ -19,7 +22,13 @@ pub fn board_cell_interaction_system(
     player_turn: ResMut<State<PlayerTurn>>,
     mut send_cell_clicked: EventWriter<CellClickedEvent>,
     mut buttons: Query<
-        (&Interaction, &mut BackgroundColor, &GridCell, Entity, &Children),
+        (
+            &Interaction,
+            &mut BackgroundColor,
+            &GridCell,
+            Entity,
+            &Children,
+        ),
         (Changed<Interaction>, With<Button>),
     >,
     mut cell_text_query: Query<&mut Text>,
@@ -46,18 +55,18 @@ pub fn board_cell_interaction_system(
                     children,
                     cell_text_query.borrow_mut(),
                     text.to_string(),
-                    (None, None, Some(theme.button_text_hovered))
+                    (None, None, Some(theme.button_text_hovered)),
                 );
-            },
+            }
             Interaction::None => {
                 *color = theme.button;
                 modify_text(
                     children,
                     cell_text_query.borrow_mut(),
                     "".to_string(),
-                    (None, None, Some(theme.button_text_hovered))
+                    (None, None, Some(theme.button_text_hovered)),
                 );
-            },
+            }
         }
     }
 }
@@ -87,7 +96,12 @@ pub fn on_cell_clicked(
 
         audio.play(movement_sound.clone());
         update_cell_state(&mut cell, &player_turn_state.get());
-        update_cell_text(&theme, &mut cell_text_query, children, &player_turn_state.get());
+        update_cell_text(
+            &theme,
+            &mut cell_text_query,
+            children,
+            &player_turn_state.get(),
+        );
         update_player_turn(&mut state);
     }
 }
@@ -116,7 +130,7 @@ fn update_cell_text(
         children,
         cell_text_query.borrow_mut(),
         text.to_string(),
-        (None, None, Some(theme.button_text))
+        (None, None, Some(theme.button_text)),
     );
 }
 
@@ -221,7 +235,6 @@ pub fn menu_background(theme: &Res<UiTheme>) -> NodeBundle {
     }
 }
 
-
 fn generate_invalid_cells(n: u32, list: &mut Vec<u32>) {
     let cols = n + 3;
     for current_n in 1..=n {
@@ -275,12 +288,22 @@ pub fn setup_board(
                                     // Spawn the button node with children
                                     parent
                                         .spawn(button_bundle(
-                                            (Val::Percent(100.0), Val::Percent(100.0), None, JustifyContent::Center, AlignItems::Center),
-                                            theme.button
+                                            (
+                                                Val::Percent(100.0),
+                                                Val::Percent(100.0),
+                                                None,
+                                                JustifyContent::Center,
+                                                AlignItems::Center,
+                                            ),
+                                            theme.button,
                                         ))
                                         .with_children(|parent| {
                                             // Spawn the button text node
-                                            parent.spawn(text_bundle("-", &asset_server, (30.0, theme.button_text)));
+                                            parent.spawn(text_bundle(
+                                                "-",
+                                                &asset_server,
+                                                (30.0, theme.button_text),
+                                            ));
                                         })
                                         // Insert the GridCell component
                                         .insert(GridCell {
@@ -294,12 +317,22 @@ pub fn setup_board(
                                     // Spawn the button node with children
                                     parent
                                         .spawn(button_bundle(
-                                            (Val::Percent(100.0), Val::Percent(100.0), None, JustifyContent::Center, AlignItems::Center),
-                                            theme.button
+                                            (
+                                                Val::Percent(100.0),
+                                                Val::Percent(100.0),
+                                                None,
+                                                JustifyContent::Center,
+                                                AlignItems::Center,
+                                            ),
+                                            theme.button,
                                         ))
                                         .with_children(|parent| {
                                             // Spawn the button text node
-                                            parent.spawn(text_bundle("", &asset_server, (30.0, theme.button_text)));
+                                            parent.spawn(text_bundle(
+                                                "",
+                                                &asset_server,
+                                                (30.0, theme.button_text),
+                                            ));
                                         })
                                         // Insert the GridCell component
                                         .insert(GridCell {
