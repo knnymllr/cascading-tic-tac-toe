@@ -70,8 +70,50 @@ fn main() {
     .add_plugins(WinningLogicPlugin)
     .add_plugins(main_menu::MenuPlugin)
     .add_plugins(GameScreen)
-    .add_systems(Startup, (place_camera, set_window_icon, start_background_audio))
+    .add_systems(Startup, (add_camera, set_window_icon, start_background_audio, add_text))
+    .add_systems(Update,update_time)
     .run();
+}
+
+fn add_camera(mut commands: Commands) {
+    commands.spawn(Camera2dBundle::default());
+}
+
+
+
+
+fn add_text(mut commands: Commands, asset_sever: Res<AssetServer>){
+    let counter = Counter::new();
+    //counter.pause();
+
+    commands.spawn(TextBundle{
+        text: Text::from_section(
+            format!("{}", time(Duration::from_secs(TIME.into()))),
+            TextStyle {
+                 font: asset_sever.load("FiraMono-Medium.ttf"),
+                 font_size: 120., 
+              color: TEXT_COLOR,
+               },
+        ),
+          style: Style{
+              position_type: PositionType:: Absolute,
+              ..default()
+       },
+     ..default()
+   }).insert(counter);
+ } 
+
+fn update_time(mut query: Query<(&mut Text, &mut Counter)>, os_time: Res<Time>){
+    for (mut text, mut counter) in &mut query{
+        if counter.paused(){
+            continue;
+        }
+        counter.tick(os_time.delta());
+        if counter.unit_just_finished(){
+            text.sections[0].value = format!("{}", time(counter.duration() - Duration::from_secs_f32(counter.elapsed_secs_round())))
+        }
+        
+    }
 }
 
 fn start_background_audio(asset_server: Res<AssetServer>, mut commands: Commands) {
@@ -99,6 +141,3 @@ fn set_window_icon(windows: NonSend<WinitWindows>, primary_window: Query<Entity,
     };
 }
 
-fn place_camera(mut commands: Commands) {
-    commands.spawn(Camera2dBundle::default());
-}
