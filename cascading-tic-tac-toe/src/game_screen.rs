@@ -13,6 +13,7 @@ impl Plugin for GameScreen {
         app.add_event::<crate::CellClickedEvent>()
 
             // setup
+            // .insert_resource(RoundInit::new(3, 3))
             .add_systems(OnEnter(PlayingState::Local), (setup_board, setup_menu_button, setup_instructions, spawn_scores_text, select_player))
 
             // interactions
@@ -22,7 +23,6 @@ impl Plugin for GameScreen {
                 button_interactions,
                 update_instruction_on_state_change
             ).run_if(in_state(PlayingState::Local)))
-
             // teardown
             .add_systems(OnEnter(MenuState::Main), despawn_screen::<GameScreenTag>);
     }

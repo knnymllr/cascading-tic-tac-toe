@@ -19,11 +19,20 @@ pub enum CellState {
     Invalid,
 }
 
+
+
 #[derive(Debug, Clone, Eq, PartialEq, Hash, States, Reflect)]
 pub enum GameState {
     Won(PlayerTag),    // Represents the game state when a player has won.
     Draw,           // Represents the game state when the game ends in a draw.
     GameOngoing,    // Represents the game state when the game is still ongoing.
+}
+
+#[derive(Debug, Clone, Eq, PartialEq, Hash, States, Reflect, Default)]
+pub enum RoundState {
+    #[default]
+    Playing,
+    Updating,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash, States, Reflect, Default)]
