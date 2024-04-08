@@ -7,6 +7,8 @@ use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 use bevy::winit::WinitWindows;
 use winit::window::Icon;
+use std::time::Duration;
+use timer::{Counter, TEXT_COLOR, TIME, time};
 
 pub use menus::*;
 pub use states::*;
@@ -27,6 +29,7 @@ mod in_game_menu;
 mod board;
 mod menus;
 mod game_screen;
+mod timer;
 
 mod ui_components {
     pub mod bundles;
