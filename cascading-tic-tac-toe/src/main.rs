@@ -90,7 +90,7 @@ fn add_text(mut commands: Commands, asset_sever: Res<AssetServer>){
         text: Text::from_section(
             format!("{}", time(Duration::from_secs(TIME.into()))),
             TextStyle {
-                 font: asset_sever.load("FiraMono-Medium.ttf"),
+                 font: asset_sever.load("fonts/FiraMono-Medium.ttf"),
                  font_size: 120., 
               color: TEXT_COLOR,
                },
