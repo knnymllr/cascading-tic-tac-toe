@@ -1,7 +1,7 @@
 use std::time::Duration;
 use bevy::prelude::*;
 
-
+// comment
 
 pub const TIME: u16 = 10*60;
 pub const TEXT_COLOR: Color = Color::WHITE;
