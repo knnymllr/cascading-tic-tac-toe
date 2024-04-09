@@ -1,7 +1,3 @@
-#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-
-use crate::theme::theme::UiTheme;
-use std::io::Cursor;
 use bevy_kira_audio::prelude::*;
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
@@ -10,7 +6,6 @@ use winit::window::Icon;
 // use std::time::Duration;
 // use timer::{Counter, TEXT_COLOR, TIME, time};
 
-pub use menus::*;
 pub use states::*;
 pub use components::*;
 pub use resources::*;
@@ -18,6 +13,7 @@ pub use game_instructions::*;
 pub use winning_logic::*;
 pub use in_game_menu::*;
 pub use board::*;
+pub use start_menu::*;
 pub use game_screen::*;
 
 mod states;
@@ -29,23 +25,8 @@ mod in_game_menu;
 mod board;
 mod menus;
 mod game_screen;
-mod timer;
-
-mod ui_components {
-    pub mod bundles;
-}
-
-mod theme {
-    pub mod theme;
-}
-
-mod utils {
-    pub mod modify_text;
-    pub mod despawn_screen;
-}
 
 fn main() {
-
     let mut app = App::new();
     app.add_plugins(DefaultPlugins.set(WindowPlugin {
         primary_window: Some(Window {
@@ -56,23 +37,21 @@ fn main() {
         ..default()
     }))
     .add_plugins(AudioPlugin)
-    .insert_resource(ResolutionSettings {large: Vec2::new(1920.0, 1080.0),medium: Vec2::new(1000.0, 600.0),small: Vec2::new(560.0, 820.0),})
-    .insert_resource(DisplaySize::Medium)
-    .insert_resource(SoundVolume(7))
     .init_resource::<UiTheme>()
     .insert_resource(ClearColor(Color::rgb(0.04, 0.04, 0.04)))
     .insert_resource::<MainCamera>(MainCamera{id:None})
-    .insert_resource(RoundCount::new(4))
+    .insert_resource(RoundInit::new(4, 5))
     .insert_state(MenuState::Main)
     .insert_state(PlayingState::NotPlaying)
     .insert_state(PlayerTurn::X)
     .insert_state(GameState::GameOngoing)
     .add_plugins(WinningLogicPlugin)
-    .add_plugins(main_menu::MenuPlugin)
+    .add_plugins(MenuPlugin)
     .add_plugins(GameScreen)
     .add_systems(Startup, (add_camera, set_window_icon, start_background_audio))
     // .add_systems(Startup, (add_camera, set_window_icon, start_background_audio, add_text))
     // .add_systems(Update,update_time)
+    .add_systems(Startup, start_background_audio)
     .run();
 }
 
@@ -140,3 +119,7 @@ fn set_window_icon(windows: NonSend<WinitWindows>, primary_window: Query<Entity,
     };
 }
 
+
+fn start_background_audio(asset_server: Res<AssetServer>, audio: Res<Audio>) {
+    audio.play(asset_server.load("sounds/mammoth.ogg")).looped();
+}

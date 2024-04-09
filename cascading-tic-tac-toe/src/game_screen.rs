@@ -43,7 +43,7 @@ fn add_text(mut commands: Commands, asset_sever: Res<AssetServer>){
             format!("{}", time(Duration::from_secs(TIME.into()))),
             TextStyle {
                  font: asset_sever.load("fonts/FiraMono-Medium.ttf"),
-                 font_size: 120., 
+                 font_size: 50., 
               color: TEXT_COLOR,
                },
         ),
