@@ -1,3 +1,5 @@
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+
 use crate::theme::theme::UiTheme;
 use std::io::Cursor;
 use bevy_kira_audio::prelude::*;
@@ -6,7 +8,7 @@ use bevy::window::PrimaryWindow;
 use bevy::winit::WinitWindows;
 use winit::window::Icon;
 
-
+pub use menus::*;
 pub use states::*;
 pub use components::*;
 pub use resources::*;
@@ -41,7 +43,9 @@ mod utils {
     pub mod modify_text;
     pub mod despawn_screen;
 }
+
 fn main() {
+
     let mut app = App::new();
     app.add_plugins(DefaultPlugins.set(WindowPlugin {
         primary_window: Some(Window {
@@ -52,11 +56,13 @@ fn main() {
         ..default()
     }))
     .add_plugins(AudioPlugin)
+    .insert_resource(ResolutionSettings {large: Vec2::new(1920.0, 1080.0),medium: Vec2::new(1000.0, 600.0),small: Vec2::new(560.0, 820.0),})
+    .insert_resource(DisplaySize::Medium)
+    .insert_resource(SoundVolume(7))
     .init_resource::<UiTheme>()
     .insert_resource(ClearColor(Color::rgb(0.04, 0.04, 0.04)))
     .insert_resource::<MainCamera>(MainCamera{id:None})
     .insert_resource(RoundCount::new(3))
-    // .insert_resource(RoundInit::new(4, 5))
     .insert_state(MenuState::Main)
     .insert_state(PlayingState::NotPlaying)
     .insert_state(PlayerTurn::X)
@@ -64,51 +70,9 @@ fn main() {
     .add_plugins(WinningLogicPlugin)
     .add_plugins(main_menu::MenuPlugin)
     .add_plugins(GameScreen)
-    .add_systems(Startup, (add_camera, set_window_icon, start_background_audio))
-    // .add_systems(Startup, (add_camera, set_window_icon, start_background_audio, add_text))
-    // .add_systems(Update,update_time)
-    .add_systems(Startup, start_background_audio)
+    .add_systems(Startup, (place_camera, set_window_icon, start_background_audio))
     .run();
 }
-
-fn add_camera(mut commands: Commands) {
-    commands.spawn(Camera2dBundle::default());
-}
-
-
-// fn add_text(mut commands: Commands, asset_sever: Res<AssetServer>){
-//     let counter = Counter::new();
-//     //counter.pause();
-
-//     commands.spawn(TextBundle{
-//         text: Text::from_section(
-//             format!("{}", time(Duration::from_secs(TIME.into()))),
-//             TextStyle {
-//                  font: asset_sever.load("fonts/FiraMono-Medium.ttf"),
-//                  font_size: 120., 
-//               color: TEXT_COLOR,
-//                },
-//         ),
-//           style: Style{
-//               position_type: PositionType:: Absolute,
-//               ..default()
-//        },
-//      ..default()
-//    }).insert(counter);
-//  } 
-
-// fn update_time(mut query: Query<(&mut Text, &mut Counter)>, os_time: Res<Time>){
-//     for (mut text, mut counter) in &mut query{
-//         if counter.paused(){
-//             continue;
-//         }
-//         counter.tick(os_time.delta());
-//         if counter.unit_just_finished(){
-//             text.sections[0].value = format!("{}", time(counter.duration() - Duration::from_secs_f32(counter.elapsed_secs_round())))
-//         }
-        
-//     }
-// }
 
 fn start_background_audio(asset_server: Res<AssetServer>, mut commands: Commands) {
     commands.spawn((
@@ -120,6 +84,7 @@ fn start_background_audio(asset_server: Res<AssetServer>, mut commands: Commands
     ));
     
 }
+
 fn set_window_icon(windows: NonSend<WinitWindows>, primary_window: Query<Entity, With<PrimaryWindow>>) {
 
     let primary_entity = primary_window.single();
@@ -133,4 +98,8 @@ fn set_window_icon(windows: NonSend<WinitWindows>, primary_window: Query<Entity,
         let icon = Icon::from_rgba(rgba, width, height).unwrap();
         primary.set_window_icon(Some(icon));
     };
+}
+
+fn place_camera(mut commands: Commands) {
+    commands.spawn(Camera2dBundle::default());
 }
