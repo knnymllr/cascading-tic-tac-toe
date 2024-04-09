@@ -31,8 +31,10 @@ pub enum GameState {
 #[derive(Debug, Clone, Eq, PartialEq, Hash, States, Reflect, Default)]
 pub enum RoundState {
     #[default]
+    NotPlaying,
     Playing,
-    Updating,
+    UpdatingX,
+    UpdatingO,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash, States, Reflect, Default)]

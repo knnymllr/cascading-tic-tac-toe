@@ -1,7 +1,9 @@
+use crate::{
+    display_menu::*, sound_menu::*, DisplaySize, GameState, MenuButtonAction, MenuState,
+    OnDisplaySettingsMenuScreen, OnMainMenuScreen, OnSettingsMenuScreen, OnSoundSettingsMenuScreen,
+    PlayingState, RoundState, SelectedOption, SoundVolume,
+};
 use bevy::{app::AppExit, prelude::*};
-use crate::{GameState, MenuState, PlayingState,OnMainMenuScreen,OnSettingsMenuScreen,
-    OnDisplaySettingsMenuScreen,MenuButtonAction,SelectedOption,SoundVolume,OnSoundSettingsMenuScreen,
-    display_menu::*,sound_menu::*,DisplaySize};
 
 use crate::ui_components::bundles::{button_bundle, image_bundle, text_bundle};
 use crate::utils::despawn_screen::despawn_screen;
@@ -21,37 +23,54 @@ struct ButtonParams {
 }
 pub struct MenuPlugin;
 
-impl Plugin for MenuPlugin{
-   fn build(&self, app: &mut App){
+impl Plugin for MenuPlugin {
+    fn build(&self, app: &mut App) {
         app
             // Systems to handle the main menu screen
             .add_systems(OnEnter(MenuState::Main), main_menu_setup)
             .add_systems(OnExit(MenuState::Main), despawn_screen::<OnMainMenuScreen>)
             // Systems to handle the settings menu screen
             .add_systems(OnEnter(MenuState::Settings), settings_menu_setup)
-            .add_systems(OnExit(MenuState::Settings),despawn_screen::<OnSettingsMenuScreen>)
+            .add_systems(
+                OnExit(MenuState::Settings),
+                despawn_screen::<OnSettingsMenuScreen>,
+            )
             // Systems to handle the display settings screen
-            .add_systems(OnEnter(MenuState::SettingsDisplay),display_settings_menu_setup)
-            .add_systems(Update,setting_button::<DisplaySize>.run_if(in_state(MenuState::SettingsDisplay)))
-            .add_systems(OnExit(MenuState::SettingsDisplay),despawn_screen::<OnDisplaySettingsMenuScreen>)
+            .add_systems(
+                OnEnter(MenuState::SettingsDisplay),
+                display_settings_menu_setup,
+            )
+            .add_systems(
+                Update,
+                setting_button::<DisplaySize>.run_if(in_state(MenuState::SettingsDisplay)),
+            )
+            .add_systems(
+                OnExit(MenuState::SettingsDisplay),
+                despawn_screen::<OnDisplaySettingsMenuScreen>,
+            )
             // Systems to handle the sound settings screen
             .add_systems(OnEnter(MenuState::SettingsSound), sound_settings_menu_setup)
-            .add_systems(Update,setting_button::<SoundVolume>.run_if(in_state(MenuState::SettingsSound)))
-            .add_systems(OnExit(MenuState::SettingsSound),despawn_screen::<OnSoundSettingsMenuScreen>)
+            .add_systems(
+                Update,
+                setting_button::<SoundVolume>.run_if(in_state(MenuState::SettingsSound)),
+            )
+            .add_systems(
+                OnExit(MenuState::SettingsSound),
+                despawn_screen::<OnSoundSettingsMenuScreen>,
+            )
             // Systems to adjust Audio volume
             .add_systems(Update, toggle_volume)
             // Systems to adjust screen resolution
             .add_systems(Update, toggle_resolution)
             // Common systems to all screens that handles buttons behavior
-            .add_systems(Update,(menu_action, button_system).run_if(in_state(PlayingState::NotPlaying)));
-            
+            .add_systems(
+                Update,
+                (menu_action, button_system).run_if(in_state(PlayingState::NotPlaying)),
+            );
     }
 }
 
-fn main_menu_setup(
-    mut commands: Commands,
-    asset_server: Res<AssetServer>
-) {
+fn main_menu_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     let buttons = vec![
         ButtonParams {
             text: "New Game",
@@ -100,11 +119,12 @@ fn main_menu_setup(
                 })
                 .with_children(|parent| {
                     // Display the game name
-                    parent.spawn(text_bundle("Cascading Tic-Tac-Toe", &asset_server, (80.0, TEXT_COLOR))
-                        .with_style(Style {
-                            margin: UiRect::all(Val::Px(50.0)),
-                            ..default()
-                        }),
+                    parent.spawn(
+                        text_bundle("Cascading Tic-Tac-Toe", &asset_server, (80.0, TEXT_COLOR))
+                            .with_style(Style {
+                                margin: UiRect::all(Val::Px(50.0)),
+                                ..default()
+                            }),
                     );
 
                     // Display three buttons for each action available from the main menu:
@@ -112,22 +132,32 @@ fn main_menu_setup(
                         parent
                             .spawn((
                                 button_bundle(
-                                    (Val::Px(250.0), Val::Px(65.0), Option::from(UiRect::all(Val::Px(20.0))), JustifyContent::Center, AlignItems::Center),
-                                    NORMAL_BUTTON.into()
+                                    (
+                                        Val::Px(250.0),
+                                        Val::Px(65.0),
+                                        Option::from(UiRect::all(Val::Px(20.0))),
+                                        JustifyContent::Center,
+                                        AlignItems::Center,
+                                    ),
+                                    NORMAL_BUTTON.into(),
                                 ),
                                 params.action,
                             ))
                             .with_children(|parent| {
                                 let icon = asset_server.load(params.icon_path);
                                 parent.spawn(image_bundle(UiImage::new(icon)));
-                                parent.spawn(text_bundle(params.text, &asset_server, (40.0, params.text_color)));
+                                parent.spawn(text_bundle(
+                                    params.text,
+                                    &asset_server,
+                                    (40.0, params.text_color),
+                                ));
                             });
                     }
                 });
         });
 }
 
-// This system updates the settings when a new value for a setting is selected, 
+// This system updates the settings when a new value for a setting is selected,
 // and marks the button as the one currently selected
 fn setting_button<T: Resource + Component + PartialEq + Copy>(
     interaction_query: Query<(&Interaction, &T, Entity), (Changed<Interaction>, With<Button>)>,
@@ -238,7 +268,8 @@ fn menu_action(
     mut app_exit_events: EventWriter<AppExit>,
     mut menu_state: ResMut<NextState<MenuState>>,
     mut playing_state: ResMut<NextState<PlayingState>>,
-    mut game_state: ResMut<NextState<GameState>>
+    mut game_state: ResMut<NextState<GameState>>,
+    mut next_round_state: ResMut<NextState<RoundState>>,
 ) {
     for (interaction, menu_button_action) in &interaction_query {
         if *interaction == Interaction::Pressed {
@@ -249,6 +280,7 @@ fn menu_action(
                 MenuButtonAction::Play => {
                     game_state.set(GameState::GameOngoing);
                     playing_state.set(PlayingState::Local);
+                    next_round_state.set(RoundState::Playing);
                     menu_state.set(MenuState::Disabled);
                 }
                 MenuButtonAction::Settings => menu_state.set(MenuState::Settings),
@@ -266,4 +298,3 @@ fn menu_action(
         }
     }
 }
-

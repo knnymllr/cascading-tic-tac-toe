@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{CellState, GameState, GridCell, PlayerTag, RoundInit};
+use crate::{CellState, GameState, RoundState, GridCell, PlayerTag, RoundInit};
 /// Plugin for handling winning logic in tic-tac-toe game
 pub struct WinningLogicPlugin;
 
@@ -18,6 +18,7 @@ impl Plugin for WinningLogicPlugin {
 pub fn is_game_over(
     cells_query: Query<&GridCell>,
     mut update_winner: ResMut<NextState<GameState>>,
+    mut update_round: ResMut<NextState<RoundState>>,
     mut round_init: ResMut<RoundInit>,
 ) {
     // Collect the states of all cells into a vector
@@ -31,24 +32,26 @@ pub fn is_game_over(
 
     // Check if player X has won
     if is_winner(&cells, n, PlayerTag::X, &mut round_init.game_combinations) {
-        round_init.x_score += 1;
+        update_round.set(RoundState::UpdatingX);
     }
     // Check if player O has won
     if is_winner(&cells, n, PlayerTag::O, &mut round_init.game_combinations) {
-        round_init.o_score += 1;
+        update_round.set(RoundState::UpdatingO);
     }
     // Check if the game is a draw
     if is_draw(&cells) {
-        update_winner.set(GameState::Draw)
+        update_winner.set(GameState::Draw);
     }
 
     if round_init.x_score >= round_init.target {
-        update_winner.set(GameState::Won(PlayerTag::X))
+        update_winner.set(GameState::Won(PlayerTag::X));
+        
     }
 
     if round_init.o_score >= round_init.target {
-        update_winner.set(GameState::Won(PlayerTag::O))
+        update_winner.set(GameState::Won(PlayerTag::O));
     }
+
 }
 
 // fn has_two_tuples(

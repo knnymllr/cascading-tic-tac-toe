@@ -47,7 +47,7 @@ fn text(asset_server: &Res<AssetServer>, theme: &Res<UiTheme>, label: &str) -> T
 pub fn setup_instructions(mut commands: Commands, theme: Res<UiTheme>, asset_server: Res<AssetServer>) {
     commands.spawn(root()).with_children(|parent| {
         parent
-            .spawn((text(&asset_server, &theme, "Test"), GameScreenTag)) // Spawn text node for instruction
+            .spawn((text(&asset_server, &theme, "Player's turn: X"), GameScreenTag)) // Spawn text node for instruction
             .insert(InstructionText); // Add InstructionText component to the text node entity
     });
 }
