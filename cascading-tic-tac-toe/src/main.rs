@@ -16,6 +16,8 @@ pub use game_instructions::*;
 pub use winning_logic::*;
 pub use in_game_menu::*;
 pub use board::*;
+pub use menus::*;
+pub use timer::*;
 pub use game_screen::*;
 
 mod states;
@@ -26,6 +28,7 @@ mod winning_logic;
 mod in_game_menu;
 mod board;
 mod menus;
+mod timer;
 mod game_screen;
 
 mod ui_components {
@@ -59,7 +62,7 @@ fn main() {
     .init_resource::<UiTheme>()
     .insert_resource(ClearColor(Color::rgb(0.04, 0.04, 0.04)))
     .insert_resource::<MainCamera>(MainCamera{id:None})
-    .insert_resource(RoundCount::new(4))
+    .insert_resource(RoundCount::new(3))
     .insert_state(MenuState::Main)
     .insert_state(PlayingState::NotPlaying)
     .insert_state(PlayerTurn::X)
@@ -81,6 +84,7 @@ fn start_background_audio(asset_server: Res<AssetServer>, mut commands: Commands
     ));
     
 }
+
 fn set_window_icon(windows: NonSend<WinitWindows>, primary_window: Query<Entity, With<PrimaryWindow>>) {
 
     let primary_entity = primary_window.single();
