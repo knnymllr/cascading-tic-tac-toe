@@ -93,7 +93,7 @@ pub fn update_scores_text_on_state_change(
             &RoundState::UpdatingX => (),
             &RoundState::UpdatingO => (),
             // &RoundState::NotPlaying => ui_text.sections[0].value = "".to_string(),
-            &RoundState::NotPlaying => (),
+            &RoundState::NotPlaying => ui_text.sections[0].value = new_scores_text,
             &RoundState::Playing => ui_text.sections[0].value = new_scores_text,
         }
     }
