@@ -77,7 +77,7 @@ pub fn update_instruction_on_state_change(
             &GameState::Won(PlayerTag::O) => ui_text.sections[0].value = "O Won!!!".to_string(),
             &GameState::Draw => ui_text.sections[0].value = "Draw :-(".to_string(),
             &GameState::GameOngoing => (),
-            &GameState::Reset => ui_text.sections[0].value = "Player's turn: X".to_string(),
+            &GameState::NotPlaying => (),
         }
     }
 }

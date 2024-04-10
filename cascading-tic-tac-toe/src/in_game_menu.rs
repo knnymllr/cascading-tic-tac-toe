@@ -96,9 +96,9 @@ pub fn button_interactions(
             Interaction::Pressed => {
                 *color = theme.button;
                 next_menu_state.set(MenuState::Main);
-                next_round_state.set(RoundState::NotPlaying);
                 next_playing_state.set(PlayingState::NotPlaying);
-                next_game_state.set(GameState::Reset);
+                next_game_state.set(GameState::NotPlaying);
+                next_round_state.set(RoundState::NotPlaying);
             }
             Interaction::Hovered => *color = theme.button_hovered,
             Interaction::None => *color = theme.button,

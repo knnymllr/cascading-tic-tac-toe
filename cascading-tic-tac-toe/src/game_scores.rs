@@ -61,20 +61,15 @@ pub fn update_scores_on_state_change(mut round: ResMut<RoundInit>, round_state: 
         match round_state.get() {
             &RoundState::UpdatingX => {
                 round.x_score += 1;
-                next_round_state.set(RoundState::Playing);
             },
             &RoundState::UpdatingO => {
                 round.o_score += 1;
-                next_round_state.set(RoundState::Playing);
             },
-            &RoundState::NotPlaying => {
-                round.x_score = 0;
-                round.o_score = 0;
-                round.game_combinations = Vec::new();
-            },
+            &RoundState::NotPlaying => (),
             &RoundState::Playing => (),
         }
     }
+    next_round_state.set(RoundState::Playing)
 }
 
 // System to update score text on state change
