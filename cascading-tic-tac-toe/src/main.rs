@@ -15,7 +15,6 @@ pub use in_game_menu::*;
 pub use timer::*;
 pub use game_screen::*;
 pub use game_scores::*;
-pub use in_game_menu::*;
 pub use menus::*;
 pub use resources::*;
 pub use states::*;
