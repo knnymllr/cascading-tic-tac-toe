@@ -11,6 +11,8 @@ use winit::window::Icon;
 pub use board::*;
 pub use components::*;
 pub use game_instructions::*;
+pub use in_game_menu::*;
+pub use timer::*;
 pub use game_screen::*;
 pub use game_scores::*;
 pub use in_game_menu::*;
@@ -29,6 +31,7 @@ mod menus;
 mod resources;
 mod states;
 mod winning_logic;
+mod timer;
 
 mod ui_components {
     pub mod bundles;
