@@ -65,7 +65,7 @@ fn main() {
     .insert_resource(ClearColor(Color::rgb(0.04, 0.04, 0.04)))
     .insert_resource::<MainCamera>(MainCamera { id: None })
     .insert_state(MenuState::Main)
-    // .add_plugins(WinningLogicPlugin)
+    .insert_state(PlayingState::NotPlaying)
     .add_plugins(main_menu::MenuPlugin)
     .add_plugins(GameScreen)
     .add_systems(

@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{GameScreenTag, GameState, MenuState, PlayingState, RoundInit, RoundState};
+use crate::{GameScreenTag, GameState, MenuState, PlayingState, RoundState};
 use crate::theme::theme::UiTheme;
 
 #[derive(Component)]
@@ -90,13 +90,11 @@ pub fn button_interactions(
     mut next_menu_state: ResMut<NextState<MenuState>>,
     mut next_playing_state: ResMut<NextState<PlayingState>>,
     mut next_round_state: ResMut<NextState<RoundState>>,
-    mut round_init: ResMut<RoundInit>,
 ) {
     for (interaction, mut color) in buttons.iter_mut() {
         match *interaction {
             Interaction::Pressed => {
                 *color = theme.button;
-                *round_init = RoundInit::new(2,3);
                 next_menu_state.set(MenuState::Main);
                 next_round_state.set(RoundState::NotPlaying);
                 next_playing_state.set(PlayingState::NotPlaying);

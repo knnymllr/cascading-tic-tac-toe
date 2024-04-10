@@ -1,7 +1,7 @@
 use crate::{
     display_menu::*, sound_menu::*, DisplaySize, GameState, MenuButtonAction, MenuState,
     OnDisplaySettingsMenuScreen, OnMainMenuScreen, OnSettingsMenuScreen, OnSoundSettingsMenuScreen,
-    PlayingState, RoundState, SelectedOption, SoundVolume,
+    PlayingState, SelectedOption, SoundVolume,
 };
 use bevy::{app::AppExit, prelude::*};
 
@@ -269,7 +269,6 @@ fn menu_action(
     mut menu_state: ResMut<NextState<MenuState>>,
     mut playing_state: ResMut<NextState<PlayingState>>,
     mut game_state: ResMut<NextState<GameState>>,
-    mut next_round_state: ResMut<NextState<RoundState>>,
 ) {
     for (interaction, menu_button_action) in &interaction_query {
         if *interaction == Interaction::Pressed {
@@ -280,7 +279,6 @@ fn menu_action(
                 MenuButtonAction::Play => {
                     game_state.set(GameState::GameOngoing);
                     playing_state.set(PlayingState::Local);
-                    next_round_state.set(RoundState::Playing);
                     menu_state.set(MenuState::Disabled);
                 }
                 MenuButtonAction::Settings => menu_state.set(MenuState::Settings),
