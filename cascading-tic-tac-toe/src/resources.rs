@@ -3,13 +3,23 @@
 use bevy::prelude::*;
 
 #[derive(Resource)]
-pub struct RoundCount(u32);
+pub struct RoundInit {
+    pub round_count: u32,
+    pub target: u32,
+    pub x_score: u32,
+    pub o_score: u32,
+    // pub time: u32,
+    pub game_combinations: Vec<[(u32,u32);3]>
+}
 
-impl RoundCount {
-    pub fn new(initial_value: u32) -> Self {
-        RoundCount(initial_value)
-    }
-    pub fn get_current(&self) -> u32 {
-        self.0
+impl RoundInit {
+    pub fn new(init_round_count: u32, init_target: u32) -> Self {
+        RoundInit {
+            round_count: init_round_count,
+            target: init_target,
+            x_score: 0,
+            o_score: 0,
+            game_combinations: Vec::new(),
+        }
     }
 }
