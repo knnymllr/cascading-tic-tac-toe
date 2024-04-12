@@ -78,6 +78,7 @@ pub fn update_instruction_on_state_change(
             &GameState::Draw => ui_text.sections[0].value = "Draw :-(".to_string(),
             &GameState::GameOngoing => (),
             &GameState::NotPlaying => (),
+            &GameState::Restarting => (),
         }
     }
 }

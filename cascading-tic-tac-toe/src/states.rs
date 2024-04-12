@@ -22,6 +22,7 @@ pub enum CellState {
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash, States, Reflect)]
 pub enum GameState {
+    Restarting,
     NotPlaying,
     GameOngoing,    // Represents the game state when the game is still ongoing.
     Won(PlayerTag), // Represents the game state when a player has won.

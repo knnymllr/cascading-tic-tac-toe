@@ -3,7 +3,7 @@ use crate::utils::despawn_screen::despawn_screen;
 use crate::{
     board_cell_interaction_system, button_interactions, on_cell_clicked, setup_board,
     setup_instructions, setup_menu_button, spawn_scores_text, update_instruction_on_state_change,
-    update_scores_on_state_change, update_scores_text_on_state_change, GameState, MenuState,
+    update_scores_on_state_change, update_scores_text_on_state_change, GameState,
     PlayerTurn, PlayingState, RoundInit, RoundState, WinningLogicPlugin,
 };
 
@@ -56,10 +56,19 @@ impl Plugin for GameScreen {
             .add_systems(Update,update_time)
 
             // teardown
-            .add_systems(OnEnter(MenuState::Main), despawn_screen::<GameScreenTag>);
+            .add_systems(OnExit(GameState::GameOngoing), despawn_screen::<GameScreenTag>)
+            //restarting game
+            .add_systems(OnEnter(GameState::Restarting),restart_game);
     }
 }
 
+//restart the game by changing states
+fn restart_game( mut next_game_state: ResMut<NextState<GameState>>,
+    mut next_playing_state: ResMut<NextState<PlayingState>>,
+){
+    next_game_state.set(GameState::GameOngoing);
+    next_playing_state.set(PlayingState::Local);
+}
 
 
 fn add_text(mut commands: Commands, asset_sever: Res<AssetServer>){
