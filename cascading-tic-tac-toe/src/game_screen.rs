@@ -66,7 +66,7 @@ fn add_text(mut commands: Commands, asset_sever: Res<AssetServer>){
     let counter = Counter::new();
     //counter.pause();
 
-    commands.spawn(TextBundle{
+    commands.spawn((TextBundle{
         text: Text::from_section(
             format!("{}", time(Duration::from_secs(TIME.into()))),
             TextStyle {
@@ -80,7 +80,7 @@ fn add_text(mut commands: Commands, asset_sever: Res<AssetServer>){
               ..default()
        },
      ..default()
-   }).insert(counter);
+   },GameScreenTag)).insert(counter);
  }
 
 fn update_time(mut query: Query<(&mut Text, &mut Counter)>, os_time: Res<Time>){
