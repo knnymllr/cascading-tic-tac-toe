@@ -10,40 +10,28 @@ pub enum InGameButtonActions{
 }
 
 
-// Define the root node for the UI of restart button
-fn restart_root() -> NodeBundle {
+// Define the root node for the UI of buttons
+fn root(button:InGameButtonActions) -> NodeBundle {
+    let height;
+    match button {
+        InGameButtonActions::RestartButton =>{
+            height = 7.0;
+        } 
+        InGameButtonActions::ReloadButton=>{
+            height = 14.0;
+        } 
+   }
     NodeBundle {
         style: Style {
             position_type: PositionType::Absolute,
             width: Val::Percent(100.0),
-            height: Val::Percent(7.0),
+            height: Val::Percent(height),
             justify_content: JustifyContent::FlexEnd,
             align_items: AlignItems::FlexEnd,
             padding: UiRect {
                 left: Val::Px(0.),
                 right: Val::Px(20.),
                 top: Val::Px(20.),
-                bottom: Val::Px(0.),
-            },
-            ..Default::default()
-        },
-        background_color: Color::NONE.into(),
-        ..Default::default()
-    }
-}
-// Define the root node for the UI of reload button
-fn reload_root() -> NodeBundle {
-    NodeBundle {
-        style: Style {
-            position_type: PositionType::Absolute,
-            width: Val::Percent(100.0),
-            height: Val::Percent(14.0),
-            justify_content: JustifyContent::FlexEnd,
-            align_items: AlignItems::FlexEnd,
-            padding: UiRect {
-                left: Val::Px(0.),
-                right: Val::Px(20.),
-                top: Val::Px(40.),
                 bottom: Val::Px(0.),
             },
             ..Default::default()
@@ -94,14 +82,14 @@ pub fn setup_menu_button(
     theme: Res<UiTheme>,
     asset_server: Res<AssetServer>,
 ) {
-    commands.spawn((restart_root(), GameScreenTag)).with_children(|parent| {
+    commands.spawn((root(InGameButtonActions::RestartButton), GameScreenTag)).with_children(|parent| {
         parent
             .spawn((button_game(&theme),InGameButtonActions::RestartButton))
             .with_children(|parent| {
                 parent.spawn(button_text_game(&asset_server, &theme, "Restart"));
             });
     });
-    commands.spawn((reload_root(), GameScreenTag)).with_children(|parent| {
+    commands.spawn((root(InGameButtonActions::ReloadButton), GameScreenTag)).with_children(|parent| {
         parent
             .spawn((button_game(&theme),InGameButtonActions::ReloadButton))
             .with_children(|parent| {
