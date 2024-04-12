@@ -30,7 +30,7 @@ impl Plugin for GameScreen {
             .insert_state(RoundState::NotPlaying)
             .add_plugins(WinningLogicPlugin)
             .add_systems(
-                OnEnter(PlayingState::Local),
+                OnEnter(PlayingState::Loading),
                 (
                     setup_board,
                     setup_menu_button,
@@ -38,6 +38,7 @@ impl Plugin for GameScreen {
                     spawn_scores_text,
                     begin_round,
                     add_text,
+                    finish,
                 ),
             )
             // interactions
@@ -62,12 +63,16 @@ impl Plugin for GameScreen {
     }
 }
 
+fn finish(mut next_playing_state: ResMut<NextState<PlayingState>>,){
+    next_playing_state.set(PlayingState::Local);
+}
+
 //restart the game by changing states
 fn restart_game( mut next_game_state: ResMut<NextState<GameState>>,
     mut next_playing_state: ResMut<NextState<PlayingState>>,
 ){
     next_game_state.set(GameState::GameOngoing);
-    next_playing_state.set(PlayingState::Local);
+    next_playing_state.set(PlayingState::Loading);
 }
 
 

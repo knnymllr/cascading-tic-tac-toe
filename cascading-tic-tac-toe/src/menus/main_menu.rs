@@ -278,7 +278,7 @@ fn menu_action(
                 }
                 MenuButtonAction::Play => {
                     game_state.set(GameState::GameOngoing);
-                    playing_state.set(PlayingState::Local);
+                    playing_state.set(PlayingState::Loading);
                     menu_state.set(MenuState::Disabled);
                 }
                 MenuButtonAction::Settings => menu_state.set(MenuState::Settings),

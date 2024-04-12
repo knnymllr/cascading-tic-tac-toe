@@ -43,6 +43,7 @@ pub enum PlayingState {
     #[default]
     NotPlaying,
     Local,
+    Loading,
 }
 
 // State used for the start menu screen
