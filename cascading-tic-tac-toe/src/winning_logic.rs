@@ -49,34 +49,33 @@ pub fn is_game_over(
         // update_winner.set(GameState::Draw);
     }
 
-    if round_init.x_score >= round_init.target {
-        update_winner.set(GameState::Won(PlayerTag::X));
-        
-    }
+    // if round_init.x_score >= round_init.target {
+    //     update_winner.set(GameState::Won(PlayerTag::X));
+    // }
 
-    if round_init.o_score >= round_init.target {
-        update_winner.set(GameState::Won(PlayerTag::O));
-    }
+    // if round_init.o_score >= round_init.target {
+    //     update_winner.set(GameState::Won(PlayerTag::O));
+    // }
 
 }
 
-// fn has_two_tuples(
-//     game_combinations: &mut Vec<[(u32, u32); 3]>,
-//     winning_combination: &[(u32, u32); 3],
-// ) -> bool {
-//     for combination in game_combinations {
-//         let mut count = 0;
-//         for tuple in winning_combination {
-//             if combination.iter().any(|comb_tuple| *comb_tuple == *tuple) {
-//                 count += 1;
-//                 if count >= 2 {
-//                     return true;
-//                 }
-//             }
-//         }
-//     }
-//     false
-// }
+fn has_two_tuples(
+    game_combinations: &mut Vec<[(u32, u32); 3]>,
+    winning_combination: &[(u32, u32); 3],
+) -> bool {
+    for combination in game_combinations {
+        let mut count = 0;
+        for tuple in winning_combination {
+            if combination.iter().any(|comb_tuple| *comb_tuple == *tuple) {
+                count += 1;
+                if count >= 2 {
+                    return true;
+                }
+            }
+        }
+    }
+    false
+}
 
 // fn is_opposite(
 //     game_combinations: &mut Vec<[(u32, u32); 3]>,
@@ -114,7 +113,7 @@ fn is_winner(
         let mut all_match = true;
 
         if game_combinations.contains(&winning_combination)
-            // || has_two_tuples(game_combinations, &winning_combination)
+            || has_two_tuples(game_combinations, &winning_combination)
         {
             continue; // Skip to the next combination
         }
