@@ -51,15 +51,15 @@ impl Plugin for GameScreen {
                     update_instruction_on_state_change,
                     update_scores_on_state_change,
                     update_scores_text_on_state_change,
+                    update_time,
                 )
                     .run_if(in_state(PlayingState::Local)),
             )
-            .add_systems(Update,update_time)
 
             // teardown
             .add_systems(OnExit(GameState::GameOngoing), despawn_screen::<GameScreenTag>)
             //restarting game
-            .add_systems(OnEnter(GameState::Restarting),restart_game);
+            .add_systems(OnEnter(GameState::LoadingNewGame),restart_game);
     }
 }
 

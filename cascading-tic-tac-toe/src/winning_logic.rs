@@ -40,7 +40,7 @@ pub fn is_game_over(
     }
     // Check if the game is a draw
     if is_draw(&cells) {
-        update_winner.set(GameState::Draw);
+        // update_winner.set(GameState::Draw);
     }
 
     if round_init.x_score >= round_init.target {

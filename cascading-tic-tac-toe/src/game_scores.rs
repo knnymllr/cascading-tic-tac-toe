@@ -67,6 +67,9 @@ pub fn update_scores_on_state_change(mut round: ResMut<RoundInit>, round_state: 
             },
             &RoundState::NotPlaying => (),
             &RoundState::Playing => (),
+            
+            &RoundState::NotUpdating => (),
+            &RoundState::UpdatingRound => (),
         }
     }
     next_round_state.set(RoundState::Playing)
@@ -90,6 +93,9 @@ pub fn update_scores_text_on_state_change(
             // &RoundState::NotPlaying => ui_text.sections[0].value = "".to_string(),
             &RoundState::NotPlaying => ui_text.sections[0].value = new_scores_text,
             &RoundState::Playing => ui_text.sections[0].value = new_scores_text,
+        
+            &RoundState::NotUpdating => (),
+            &RoundState::UpdatingRound => (),
         }
     }
 }
