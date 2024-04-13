@@ -69,10 +69,15 @@ pub fn update_scores_on_state_change(
         let new_scores_text = format!("X Score: {}\nO Score: {}", round.x_score, round.o_score);
 
         match round_state.get() {
-            &RoundState::NotUpdating => ui_text.sections[0].value = new_scores_text,
-            &RoundState::UpdatingRound => ui_text.sections[0].value = new_scores_text,
+            &RoundState::NotUpdating => {
+                ui_text.sections[0].value = new_scores_text;
+
+            },
+            &RoundState::UpdatingRound => {
+                ui_text.sections[0].value = new_scores_text;
+                next_round_state.set(RoundState::NotUpdating);
+            },
         }
-        next_round_state.set(RoundState::NotUpdating);
     }
 
 }

@@ -2,8 +2,8 @@ use crate::utils::despawn_screen::despawn_screen;
 use crate::{
     board_cell_interaction_system, button_interactions, on_cell_clicked, setup_board,
     setup_instructions, setup_menu_button, setup_scores_text, update_instruction_on_state_change,
-    update_scores_on_state_change, GameState, PlayerTurn,
-    RoundInit, RoundState, WinningLogicPlugin,
+    update_scores_on_state_change, GameState, PlayerTurn, RoundInit, RoundState,
+    WinningLogicPlugin,
 };
 
 use crate::timer::{time, Counter, TEXT_COLOR, TIME};
@@ -46,10 +46,14 @@ impl Plugin for GameScreen {
                     on_cell_clicked,
                     button_interactions,
                     update_instruction_on_state_change,
-                    update_scores_on_state_change,
                     update_time,
                 )
+                    .chain()
                     .run_if(in_state(GameState::GameOngoing)),
+            )
+            .add_systems(
+                Update,
+                (update_scores_on_state_change,).run_if(in_state(RoundState::UpdatingRound)),
             )
             // teardown
             .add_systems(
@@ -74,7 +78,6 @@ fn load_new_game(
     next_player_turn.set(PlayerTurn::X);
     *round_init = RoundInit::new(3);
     next_game_state.set(GameState::LoadingNewGame);
-    // TODO : UI update
 }
 
 fn setup_timer_text(mut commands: Commands, asset_sever: Res<AssetServer>) {

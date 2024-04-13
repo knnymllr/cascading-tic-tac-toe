@@ -31,24 +31,16 @@ pub fn is_game_over(
     }
 
     // Check if player X has won
-    let prev_x_score = round_init.x_score;
-    while is_winner(&cells, n, PlayerTag::X, &mut round_init.game_combinations) {
+    if is_winner(&cells, n, PlayerTag::X, &mut round_init.game_combinations) {
         round_init.x_score += 1;
-        round_init.round_count += 1;
-    }
-
-    if prev_x_score < round_init.x_score {
+        // round_init.round_count += 1;
         update_round.set(RoundState::UpdatingRound)
     }
 
     // Check if player O has won
-    let prev_o_score = round_init.o_score;
-    while is_winner(&cells, n, PlayerTag::O, &mut round_init.game_combinations) {
+    if is_winner(&cells, n, PlayerTag::O, &mut round_init.game_combinations) {
         round_init.o_score += 1;
-        round_init.round_count += 1;
-    }
-
-    if prev_o_score < round_init.o_score {
+        // round_init.round_count += 1;
         update_round.set(RoundState::UpdatingRound)
     }
 
