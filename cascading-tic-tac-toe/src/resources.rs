@@ -13,9 +13,9 @@ pub struct RoundInit {
 }
 
 impl RoundInit {
-    pub fn new(init_round_count: u32, init_target: u32) -> Self {
+    pub fn new(init_target: u32) -> Self {
         RoundInit {
-            round_count: init_round_count,
+            round_count: 0,
             target: init_target,
             x_score: 0,
             o_score: 0,

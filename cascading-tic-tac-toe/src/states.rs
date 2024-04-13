@@ -20,12 +20,13 @@ pub enum CellState {
     Won(PlayerTag), // TODO: Fill cells in winning combos with bg color (color chooser?)
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash, States, Reflect)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash, States, Reflect, Default)]
 pub enum GameState {
+    #[default]
     NotPlaying,
+    LoadingNewGame,         
     GameOngoing,    
     Won(PlayerTag),
-    LoadingNewGame,         
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash, States, Reflect, Default)]
@@ -35,8 +36,6 @@ pub enum RoundState {
     UpdatingRound,
     UpdatingX,
     UpdatingO,
-    Playing,
-    NotPlaying,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash, States, Reflect, Default)]

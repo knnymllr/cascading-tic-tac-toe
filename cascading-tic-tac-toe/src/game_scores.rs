@@ -65,14 +65,12 @@ pub fn update_scores_on_state_change(mut round: ResMut<RoundInit>, round_state: 
             &RoundState::UpdatingO => {
                 round.o_score += 1;
             },
-            &RoundState::NotPlaying => (),
-            &RoundState::Playing => (),
             
             &RoundState::NotUpdating => (),
             &RoundState::UpdatingRound => (),
         }
     }
-    next_round_state.set(RoundState::Playing)
+    next_round_state.set(RoundState::NotUpdating)
 }
 
 // System to update score text on state change
@@ -91,11 +89,8 @@ pub fn update_scores_text_on_state_change(
             &RoundState::UpdatingX => (),
             &RoundState::UpdatingO => (),
             // &RoundState::NotPlaying => ui_text.sections[0].value = "".to_string(),
-            &RoundState::NotPlaying => ui_text.sections[0].value = new_scores_text,
-            &RoundState::Playing => ui_text.sections[0].value = new_scores_text,
-        
-            &RoundState::NotUpdating => (),
-            &RoundState::UpdatingRound => (),
+            &RoundState::NotUpdating => ui_text.sections[0].value = new_scores_text,
+            &RoundState::UpdatingRound => ui_text.sections[0].value = new_scores_text,
         }
     }
 }

@@ -282,8 +282,8 @@ fn menu_action(
                     app_exit_events.send(AppExit);
                 }
                 MenuButtonAction::Play => {
-                    game_state.set(GameState::GameOngoing);
-                    playing_state.set(PlayingState::Loading);
+                    playing_state.set(PlayingState::Local);
+                    game_state.set(GameState::LoadingNewGame);
                     menu_state.set(MenuState::Disabled);
                 }
                 MenuButtonAction::Settings => menu_state.set(MenuState::Settings),
