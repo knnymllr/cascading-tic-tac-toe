@@ -48,7 +48,6 @@ impl Plugin for GameScreen {
                     update_instruction_on_state_change,
                     update_time,
                 )
-                    .chain()
                     .run_if(in_state(GameState::GameOngoing)),
             )
             .add_systems(
