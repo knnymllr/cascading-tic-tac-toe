@@ -2,8 +2,8 @@ use crate::utils::despawn_screen::despawn_screen;
 use crate::{
     board_cell_interaction_system, button_interactions, on_cell_clicked, setup_board,
     setup_instructions, setup_menu_button, setup_scores_text, update_instruction_on_state_change,
-    update_scores_on_state_change, GameState, PlayerTurn, RoundInit, RoundState,
-    WinningLogicPlugin,
+    update_scores_on_state_change, GameState, PlayerTag, PlayerTurn, PlayingState, RoundInit,
+    RoundState, WinningLogicPlugin,
 };
 
 use crate::timer::{time, Counter, TEXT_COLOR, TIME};
@@ -48,17 +48,29 @@ impl Plugin for GameScreen {
                     update_instruction_on_state_change,
                     update_time,
                 )
+                    // .chain()
                     .run_if(in_state(GameState::GameOngoing)),
             )
             .add_systems(
                 Update,
                 (update_scores_on_state_change,).run_if(in_state(RoundState::UpdatingRound)),
             )
-            // teardown
             .add_systems(
-                OnExit(GameState::GameOngoing),
-                despawn_screen::<GameScreenTag>,
+                OnEnter(GameState::Won(PlayerTag::X)),
+                (
+                    update_instruction_on_state_change,
+                    update_scores_on_state_change,
+                ),
             )
+            .add_systems(
+                OnEnter(GameState::Won(PlayerTag::O)),
+                (
+                    update_instruction_on_state_change,
+                    update_scores_on_state_change,
+                ),
+            )
+            // teardown
+            .add_systems(OnExit(PlayingState::Local), despawn_screen::<GameScreenTag>)
             //restarting game
             .add_systems(OnEnter(GameState::LoadingNewGame), load_new_game);
     }
