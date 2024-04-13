@@ -55,28 +55,11 @@ pub fn setup_scores_text(mut commands: Commands, theme: Res<UiTheme>, asset_serv
             .insert(ScoresText); // Add ScoresText component to the text node entity
     });
 }
-
-pub fn update_scores_on_state_change(mut round: ResMut<RoundInit>, round_state: Res<State<RoundState>>, mut next_round_state: ResMut<NextState<RoundState>>) {
-    if round_state.is_changed() {
-        match round_state.get() {
-            &RoundState::UpdatingX => {
-                round.x_score += 1;
-            },
-            &RoundState::UpdatingO => {
-                round.o_score += 1;
-            },
-            
-            &RoundState::NotUpdating => (),
-            &RoundState::UpdatingRound => (),
-        }
-    }
-    next_round_state.set(RoundState::NotUpdating)
-}
-
 // System to update score text on state change
-pub fn update_scores_text_on_state_change(
+pub fn update_scores_on_state_change(
     round: Res<RoundInit>,
     round_state: Res<State<RoundState>>,
+    mut next_round_state: ResMut<NextState<RoundState>>,
     mut scores_text
     : Query<&mut Text, With<ScoresText>>,
 ) {
@@ -86,11 +69,10 @@ pub fn update_scores_text_on_state_change(
         let new_scores_text = format!("X Score: {}\nO Score: {}", round.x_score, round.o_score);
 
         match round_state.get() {
-            &RoundState::UpdatingX => (),
-            &RoundState::UpdatingO => (),
-            // &RoundState::NotPlaying => ui_text.sections[0].value = "".to_string(),
             &RoundState::NotUpdating => ui_text.sections[0].value = new_scores_text,
             &RoundState::UpdatingRound => ui_text.sections[0].value = new_scores_text,
         }
+        next_round_state.set(RoundState::NotUpdating);
     }
+
 }

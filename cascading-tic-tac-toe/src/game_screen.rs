@@ -2,7 +2,7 @@ use crate::utils::despawn_screen::despawn_screen;
 use crate::{
     board_cell_interaction_system, button_interactions, on_cell_clicked, setup_board,
     setup_instructions, setup_menu_button, setup_scores_text, update_instruction_on_state_change,
-    update_scores_on_state_change, update_scores_text_on_state_change, GameState, PlayerTurn,
+    update_scores_on_state_change, GameState, PlayerTurn,
     RoundInit, RoundState, WinningLogicPlugin,
 };
 
@@ -47,7 +47,6 @@ impl Plugin for GameScreen {
                     button_interactions,
                     update_instruction_on_state_change,
                     update_scores_on_state_change,
-                    update_scores_text_on_state_change,
                     update_time,
                 )
                     .run_if(in_state(GameState::GameOngoing)),

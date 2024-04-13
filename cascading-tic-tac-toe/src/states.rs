@@ -34,8 +34,6 @@ pub enum RoundState {
     #[default]
     NotUpdating,
     UpdatingRound,
-    UpdatingX,
-    UpdatingO,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash, States, Reflect, Default)]
