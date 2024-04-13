@@ -4,15 +4,28 @@ use crate::{GameScreenTag, GameState, MenuState, PlayingState, RoundState};
 use crate::theme::theme::UiTheme;
 
 #[derive(Component)]
-pub struct ReloadButton;
+pub enum InGameButtonActions{
+    ReloadButton,
+    RestartButton,
+}
 
-// Define the root node for the UI button
-fn root() -> NodeBundle {
+
+// Define the root node for the UI of buttons
+fn root(button:InGameButtonActions) -> NodeBundle {
+    let height;
+    match button {
+        InGameButtonActions::RestartButton =>{
+            height = 7.0;
+        } 
+        InGameButtonActions::ReloadButton=>{
+            height = 14.0;
+        } 
+   }
     NodeBundle {
         style: Style {
             position_type: PositionType::Absolute,
             width: Val::Percent(100.0),
-            height: Val::Percent(7.0),
+            height: Val::Percent(height),
             justify_content: JustifyContent::FlexEnd,
             align_items: AlignItems::FlexEnd,
             padding: UiRect {
@@ -69,36 +82,53 @@ pub fn setup_menu_button(
     theme: Res<UiTheme>,
     asset_server: Res<AssetServer>,
 ) {
-    commands.spawn((root(), GameScreenTag)).with_children(|parent| {
+    commands.spawn((root(InGameButtonActions::RestartButton), GameScreenTag)).with_children(|parent| {
         parent
-            .spawn(button_game(&theme))
+            .spawn((button_game(&theme),InGameButtonActions::RestartButton))
+            .with_children(|parent| {
+                parent.spawn(button_text_game(&asset_server, &theme, "Restart"));
+            });
+    });
+    commands.spawn((root(InGameButtonActions::ReloadButton), GameScreenTag)).with_children(|parent| {
+        parent
+            .spawn((button_game(&theme),InGameButtonActions::ReloadButton))
             .with_children(|parent| {
                 parent.spawn(button_text_game(&asset_server, &theme, "Main Menu"));
-            })
-            .insert(ReloadButton);
+            });
     });
 }
 
-// System to handle interactions with the reload button
+// System to handle interactions with the in game menu buttons
 pub fn button_interactions(
     theme: Res<UiTheme>,
     mut buttons: Query<
-        (&Interaction, &mut BackgroundColor),
-        (Changed<Interaction>, With<Button>, With<ReloadButton>),
+        (&Interaction, &InGameButtonActions, &mut BackgroundColor),
+        (Changed<Interaction>, With<Button>),
     >,
     mut next_game_state: ResMut<NextState<GameState>>,
     mut next_menu_state: ResMut<NextState<MenuState>>,
     mut next_playing_state: ResMut<NextState<PlayingState>>,
     mut next_round_state: ResMut<NextState<RoundState>>,
 ) {
-    for (interaction, mut color) in buttons.iter_mut() {
+    for (interaction,in_game_menu_button_action,mut color) in buttons.iter_mut() {
         match *interaction {
             Interaction::Pressed => {
-                *color = theme.button;
-                next_menu_state.set(MenuState::Main);
-                next_playing_state.set(PlayingState::NotPlaying);
-                next_game_state.set(GameState::NotPlaying);
-                next_round_state.set(RoundState::NotPlaying);
+                match in_game_menu_button_action {
+                    InGameButtonActions::ReloadButton => {
+                        *color = theme.button;
+                        next_menu_state.set(MenuState::Main);
+                        next_playing_state.set(PlayingState::NotPlaying);
+                        next_game_state.set(GameState::NotPlaying);
+                        next_round_state.set(RoundState::NotPlaying);
+                    }
+                    InGameButtonActions::RestartButton =>{
+                        *color = theme.button;
+                        next_game_state.set(GameState::Restarting);
+                        next_playing_state.set(PlayingState::NotPlaying);
+                        next_round_state.set(RoundState::NotPlaying);
+                    }
+                }
+                
             }
             Interaction::Hovered => *color = theme.button_hovered,
             Interaction::None => *color = theme.button,
