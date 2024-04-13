@@ -45,7 +45,7 @@ fn text(asset_server: &Res<AssetServer>, theme: &Res<UiTheme>, label: &str) -> T
 }
 
 // System to set up the game scores
-pub fn spawn_scores_text(mut commands: Commands, theme: Res<UiTheme>, asset_server: Res<AssetServer>, round: Res<RoundInit>) {
+pub fn setup_scores_text(mut commands: Commands, theme: Res<UiTheme>, asset_server: Res<AssetServer>, round: Res<RoundInit>) {
     
     let label = format!("X Score: {}\nO Score: {}", round.x_score, round.o_score);
 
