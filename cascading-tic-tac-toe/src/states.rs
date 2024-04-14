@@ -17,33 +17,33 @@ pub enum CellState {
     Valid,
     Invalid,
     Filled(PlayerTag),
-    Won(PlayerTag),
+    Won(PlayerTag), // TODO: Fill cells in winning combos with bg color (color chooser?)
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash, States, Reflect)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash, States, Reflect, Default)]
 pub enum GameState {
-    Restarting,
+    #[default]
     NotPlaying,
-    GameOngoing,    // Represents the game state when the game is still ongoing.
-    Won(PlayerTag), // Represents the game state when a player has won.
-    Draw,           // Represents the game state when the game ends in a draw.
+    LoadingNewGame,         
+    GameOngoing,    
+    Won(PlayerTag),
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash, States, Reflect, Default)]
 pub enum RoundState {
     #[default]
-    NotPlaying,
-    Playing,
-    UpdatingX,
-    UpdatingO,
+    NotUpdating,
+    UpdatingRound,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash, States, Reflect, Default)]
 pub enum PlayingState {
     #[default]
     NotPlaying,
-    Local,
     Loading,
+    Local,
+    Online, // TODO
+    VsComputer, // TODO
 }
 
 // State used for the start menu screen
@@ -51,6 +51,9 @@ pub enum PlayingState {
 pub enum MenuState {
     #[default]
     Main,
+    Round,
+    RoundTarget,
+    RoundTimer,
     Settings,
     SettingsDisplay,
     SettingsSound,

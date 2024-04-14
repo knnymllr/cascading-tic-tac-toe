@@ -5,7 +5,7 @@ use crate::theme::theme::UiTheme;
 
 #[derive(Component)]
 pub enum InGameButtonActions{
-    ReloadButton,
+    MainMenuButton,
     RestartButton,
 }
 
@@ -17,7 +17,7 @@ fn root(button:InGameButtonActions) -> NodeBundle {
         InGameButtonActions::RestartButton =>{
             height = 7.0;
         } 
-        InGameButtonActions::ReloadButton=>{
+        InGameButtonActions::MainMenuButton=>{
             height = 14.0;
         } 
    }
@@ -89,9 +89,9 @@ pub fn setup_menu_button(
                 parent.spawn(button_text_game(&asset_server, &theme, "Restart"));
             });
     });
-    commands.spawn((root(InGameButtonActions::ReloadButton), GameScreenTag)).with_children(|parent| {
+    commands.spawn((root(InGameButtonActions::MainMenuButton), GameScreenTag)).with_children(|parent| {
         parent
-            .spawn((button_game(&theme),InGameButtonActions::ReloadButton))
+            .spawn((button_game(&theme),InGameButtonActions::MainMenuButton))
             .with_children(|parent| {
                 parent.spawn(button_text_game(&asset_server, &theme, "Main Menu"));
             });
@@ -114,18 +114,17 @@ pub fn button_interactions(
         match *interaction {
             Interaction::Pressed => {
                 match in_game_menu_button_action {
-                    InGameButtonActions::ReloadButton => {
+                    InGameButtonActions::MainMenuButton => {
                         *color = theme.button;
-                        next_menu_state.set(MenuState::Main);
-                        next_playing_state.set(PlayingState::NotPlaying);
+                        next_round_state.set(RoundState::NotUpdating);
                         next_game_state.set(GameState::NotPlaying);
-                        next_round_state.set(RoundState::NotPlaying);
+                        next_playing_state.set(PlayingState::NotPlaying);
+                        next_menu_state.set(MenuState::Main);
                     }
                     InGameButtonActions::RestartButton =>{
                         *color = theme.button;
-                        next_game_state.set(GameState::Restarting);
-                        next_playing_state.set(PlayingState::NotPlaying);
-                        next_round_state.set(RoundState::NotPlaying);
+                        next_game_state.set(GameState::LoadingNewGame);
+                        next_round_state.set(RoundState::NotUpdating);
                     }
                 }
                 

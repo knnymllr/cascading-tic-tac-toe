@@ -1,7 +1,7 @@
 use crate::{
     display_menu::*, sound_menu::*, DisplaySize, GameState, MenuButtonAction, MenuState,
     OnDisplaySettingsMenuScreen, OnMainMenuScreen, OnSettingsMenuScreen, OnSoundSettingsMenuScreen,
-    PlayingState, SelectedOption, SoundVolume,
+    PlayingState, ResolutionSettings, SelectedOption, SoundVolume,
 };
 use bevy::{app::AppExit, prelude::*};
 
@@ -25,48 +25,53 @@ pub struct MenuPlugin;
 
 impl Plugin for MenuPlugin {
     fn build(&self, app: &mut App) {
-        app
-            // Systems to handle the main menu screen
-            .add_systems(OnEnter(MenuState::Main), main_menu_setup)
-            .add_systems(OnExit(MenuState::Main), despawn_screen::<OnMainMenuScreen>)
-            // Systems to handle the settings menu screen
-            .add_systems(OnEnter(MenuState::Settings), settings_menu_setup)
-            .add_systems(
-                OnExit(MenuState::Settings),
-                despawn_screen::<OnSettingsMenuScreen>,
-            )
-            // Systems to handle the display settings screen
-            .add_systems(
-                OnEnter(MenuState::SettingsDisplay),
-                display_settings_menu_setup,
-            )
-            .add_systems(
-                Update,
-                setting_button::<DisplaySize>.run_if(in_state(MenuState::SettingsDisplay)),
-            )
-            .add_systems(
-                OnExit(MenuState::SettingsDisplay),
-                despawn_screen::<OnDisplaySettingsMenuScreen>,
-            )
-            // Systems to handle the sound settings screen
-            .add_systems(OnEnter(MenuState::SettingsSound), sound_settings_menu_setup)
-            .add_systems(
-                Update,
-                setting_button::<SoundVolume>.run_if(in_state(MenuState::SettingsSound)),
-            )
-            .add_systems(
-                OnExit(MenuState::SettingsSound),
-                despawn_screen::<OnSoundSettingsMenuScreen>,
-            )
-            // Systems to adjust Audio volume
-            .add_systems(Update, toggle_volume)
-            // Systems to adjust screen resolution
-            .add_systems(Update, toggle_resolution)
-            // Common systems to all screens that handles buttons behavior
-            .add_systems(
-                Update,
-                (menu_action, button_system).run_if(in_state(PlayingState::NotPlaying)),
-            );
+        app.insert_resource(ResolutionSettings {
+            large: Vec2::new(1920.0, 1080.0),
+            medium: Vec2::new(1000.0, 600.0),
+            small: Vec2::new(560.0, 820.0),
+        })
+        // Systems to handle the main menu screen
+        .add_systems(OnEnter(MenuState::Main), main_menu_setup)
+        .add_systems(OnExit(MenuState::Main), despawn_screen::<OnMainMenuScreen>)
+        // Systems to handle the settings menu screen
+        .add_systems(OnEnter(MenuState::Settings), settings_menu_setup)
+        .add_systems(
+            OnExit(MenuState::Settings),
+            despawn_screen::<OnSettingsMenuScreen>,
+        )
+        // Systems to handle the display settings screen
+        .add_systems(
+            OnEnter(MenuState::SettingsDisplay),
+            display_settings_menu_setup,
+        )
+        .add_systems(
+            Update,
+            setting_button::<DisplaySize>.run_if(in_state(MenuState::SettingsDisplay)),
+        )
+        .add_systems(
+            OnExit(MenuState::SettingsDisplay),
+            despawn_screen::<OnDisplaySettingsMenuScreen>,
+        )
+        // Systems to handle the sound settings screen
+        .add_systems(OnEnter(MenuState::SettingsSound), sound_settings_menu_setup)
+        .add_systems(
+            Update,
+            setting_button::<SoundVolume>.run_if(in_state(MenuState::SettingsSound)),
+        )
+        .add_systems(
+            OnExit(MenuState::SettingsSound),
+            despawn_screen::<OnSoundSettingsMenuScreen>,
+        )
+        // Systems to adjust Audio volume
+        // .add_systems(Update, toggle_volume)
+        // Systems to adjust screen resolution
+        // .add_systems(Update, toggle_resolution)
+        // Common systems to all screens that handles buttons behavior
+        .add_systems(
+            Update,
+            (menu_action, button_system, toggle_volume, toggle_resolution)
+                .run_if(in_state(PlayingState::NotPlaying)),
+        );
     }
 }
 
@@ -277,8 +282,8 @@ fn menu_action(
                     app_exit_events.send(AppExit);
                 }
                 MenuButtonAction::Play => {
-                    game_state.set(GameState::GameOngoing);
-                    playing_state.set(PlayingState::Loading);
+                    playing_state.set(PlayingState::Local);
+                    game_state.set(GameState::LoadingNewGame);
                     menu_state.set(MenuState::Disabled);
                 }
                 MenuButtonAction::Settings => menu_state.set(MenuState::Settings),

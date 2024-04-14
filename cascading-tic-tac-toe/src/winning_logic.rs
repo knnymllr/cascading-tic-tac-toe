@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{CellState, GameState, RoundState, GridCell, PlayerTag, RoundInit};
+use crate::{CellState, GameState, GridCell, PlayerTag, RoundInit, RoundState};
 /// Plugin for handling winning logic in tic-tac-toe game
 pub struct WinningLogicPlugin;
 
@@ -9,15 +9,26 @@ impl Plugin for WinningLogicPlugin {
         // Add the system for checking winning conditions
         app.add_systems(
             Update,
-            is_game_over.run_if(in_state(GameState::GameOngoing)),
+            (is_round_over, is_game_over.after(is_round_over))
+                .run_if(in_state(GameState::GameOngoing)),
         );
     }
 }
 
+fn is_game_over(round: Res<RoundInit>, mut next_game_state: ResMut<NextState<GameState>>, mut next_round_state: ResMut<NextState<RoundState>>) {
+    if round.x_score >= round.target {
+        next_round_state.set(RoundState::NotUpdating);
+        next_game_state.set(GameState::Won(PlayerTag::X));
+    }
+    if round.o_score >= round.target {
+        next_round_state.set(RoundState::NotUpdating);
+        next_game_state.set(GameState::Won(PlayerTag::O));
+    }
+}
+
 /// System for checking if the game is over
-pub fn is_game_over(
+fn is_round_over(
     cells_query: Query<&GridCell>,
-    mut update_winner: ResMut<NextState<GameState>>,
     mut update_round: ResMut<NextState<RoundState>>,
     mut round_init: ResMut<RoundInit>,
 ) {
@@ -31,46 +42,43 @@ pub fn is_game_over(
     }
 
     // Check if player X has won
-    if is_winner(&cells, n, PlayerTag::X, &mut round_init.game_combinations) {
-        update_round.set(RoundState::UpdatingX);
+    while is_winner(&cells, n, PlayerTag::X, &mut round_init.game_combinations) {
+        round_init.x_score += 1;
+        // round_init.round_count += 1;
+        update_round.set(RoundState::UpdatingRound)
     }
+
     // Check if player O has won
-    if is_winner(&cells, n, PlayerTag::O, &mut round_init.game_combinations) {
-        update_round.set(RoundState::UpdatingO);
+    while is_winner(&cells, n, PlayerTag::O, &mut round_init.game_combinations) {
+        round_init.o_score += 1;
+        // round_init.round_count += 1;
+        update_round.set(RoundState::UpdatingRound)
     }
-    // Check if the game is a draw
+
+    // TODO: REFACTOR
+    // TODO: Check if the game is a draw, optimize to exclude cells that cannot be combos
     if is_draw(&cells) {
-        update_winner.set(GameState::Draw);
+        // update_winner.set(GameState::Draw);
     }
-
-    if round_init.x_score >= round_init.target {
-        update_winner.set(GameState::Won(PlayerTag::X));
-        
-    }
-
-    if round_init.o_score >= round_init.target {
-        update_winner.set(GameState::Won(PlayerTag::O));
-    }
-
 }
 
-// fn has_two_tuples(
-//     game_combinations: &mut Vec<[(u32, u32); 3]>,
-//     winning_combination: &[(u32, u32); 3],
-// ) -> bool {
-//     for combination in game_combinations {
-//         let mut count = 0;
-//         for tuple in winning_combination {
-//             if combination.iter().any(|comb_tuple| *comb_tuple == *tuple) {
-//                 count += 1;
-//                 if count >= 2 {
-//                     return true;
-//                 }
-//             }
-//         }
-//     }
-//     false
-// }
+fn has_two_tuples(
+    game_combinations: &mut Vec<[(u32, u32); 3]>,
+    winning_combination: &[(u32, u32); 3],
+) -> bool {
+    for combination in game_combinations {
+        let mut count = 0;
+        for tuple in winning_combination {
+            if combination.iter().any(|comb_tuple| *comb_tuple == *tuple) {
+                count += 1;
+                if count >= 2 {
+                    return true;
+                }
+            }
+        }
+    }
+    false
+}
 
 // fn is_opposite(
 //     game_combinations: &mut Vec<[(u32, u32); 3]>,
@@ -80,7 +88,7 @@ pub fn is_game_over(
 //         for tuple in winning_combination {
 //             if combination.iter().any(|comb_tuple| *comb_tuple == *tuple) {
 //                 if has_opposite(combination, winning_combination, tuple) {
-//                     return true; 
+//                     return true;
 //                 }
 //             }
 //         }
@@ -108,7 +116,7 @@ fn is_winner(
         let mut all_match = true;
 
         if game_combinations.contains(&winning_combination)
-            // || has_two_tuples(game_combinations, &winning_combination)
+            || has_two_tuples(game_combinations, &winning_combination)
         {
             continue; // Skip to the next combination
         }
