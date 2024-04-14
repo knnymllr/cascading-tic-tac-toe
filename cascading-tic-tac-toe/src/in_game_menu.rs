@@ -116,10 +116,10 @@ pub fn button_interactions(
                 match in_game_menu_button_action {
                     InGameButtonActions::MainMenuButton => {
                         *color = theme.button;
-                        next_menu_state.set(MenuState::Main);
-                        next_playing_state.set(PlayingState::NotPlaying);
-                        next_game_state.set(GameState::NotPlaying);
                         next_round_state.set(RoundState::NotUpdating);
+                        next_game_state.set(GameState::NotPlaying);
+                        next_playing_state.set(PlayingState::NotPlaying);
+                        next_menu_state.set(MenuState::Main);
                     }
                     InGameButtonActions::RestartButton =>{
                         *color = theme.button;
