@@ -108,6 +108,12 @@ impl Plugin for GameScreen {
                     finished_restarting,
                 )
                     .chain(),
+            )
+            .add_systems(OnEnter(GameState::NotPlaying),
+            (
+                despawn_screen::<GameScreenTag>,
+                restart_game,
+            )
             );
     }
 }
