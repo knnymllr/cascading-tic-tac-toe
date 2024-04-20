@@ -67,11 +67,35 @@ impl Plugin for GameScreen {
             )
             .add_systems(
                 OnEnter(GameState::Won(PlayerTag::X)),
-                (update_instruction_on_state_change,),
+        (
+                    despawn_screen::<GameScreenTag>,
+                    (
+                        setup_board,
+                        setup_menu_button,
+                        setup_instructions,
+                        update_instruction_on_state_change,
+                        setup_scores_text,
+                        setup_timer_text,
+                        loading_finished,
+                    )
+                        .chain(),
+                )
             )
             .add_systems(
                 OnEnter(GameState::Won(PlayerTag::O)),
-                (update_instruction_on_state_change,),
+        (
+                    despawn_screen::<GameScreenTag>,
+                    (
+                        setup_board,
+                        setup_menu_button,
+                        setup_instructions,
+                        update_instruction_on_state_change,
+                        setup_scores_text,
+                        setup_timer_text,
+                        loading_finished,
+                    )
+                        .chain(),
+                ),
             )
             // teardown
             .add_systems(OnExit(PlayingState::Local), despawn_screen::<GameScreenTag>)
