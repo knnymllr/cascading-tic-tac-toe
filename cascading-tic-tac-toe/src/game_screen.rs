@@ -67,7 +67,7 @@ impl Plugin for GameScreen {
             )
             .add_systems(
                 OnEnter(GameState::Won(PlayerTag::X)),
-        (
+                (
                     despawn_screen::<GameScreenTag>,
                     (
                         setup_board,
@@ -79,11 +79,11 @@ impl Plugin for GameScreen {
                         loading_finished,
                     )
                         .chain(),
-                )
+                ),
             )
             .add_systems(
                 OnEnter(GameState::Won(PlayerTag::O)),
-        (
+                (
                     despawn_screen::<GameScreenTag>,
                     (
                         setup_board,
@@ -108,6 +108,10 @@ impl Plugin for GameScreen {
                     finished_restarting,
                 )
                     .chain(),
+            )
+            .add_systems(
+                OnEnter(GameState::NotPlaying),
+                (despawn_screen::<GameScreenTag>, restart_game),
             );
     }
 }
@@ -129,9 +133,7 @@ fn restart_game(
     next_player_turn.set(PlayerTurn::X);
 }
 
-fn finished_restarting(
-    mut next_game_state: ResMut<NextState<GameState>>,
-) {
+fn finished_restarting(mut next_game_state: ResMut<NextState<GameState>>) {
     next_game_state.set(GameState::LoadingNewGame);
 }
 
