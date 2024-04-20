@@ -107,7 +107,6 @@ fn restart_game(
 
 fn finished_restarting(
     mut next_game_state: ResMut<NextState<GameState>>,
-    mut next_round_state: ResMut<NextState<RoundState>>,
 ) {
     next_game_state.set(GameState::LoadingNewGame);
 }
