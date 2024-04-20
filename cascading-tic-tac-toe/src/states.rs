@@ -6,6 +6,12 @@ pub enum PlayerTag {
     O,
 }
 
+impl std::fmt::Display for PlayerTag {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+      write!(f, "{:?}", self) // Use Debug formatting for simplicity
+    }
+  }
+
 #[derive(Debug, Clone, Eq, PartialEq, Hash, States, Reflect)]
 pub enum PlayerTurn {
     X,
@@ -24,8 +30,10 @@ pub enum CellState {
 pub enum GameState {
     #[default]
     NotPlaying,
-    LoadingNewGame,         
-    GameOngoing,    
+    LoadingNewGame,  
+    RestartingGame,       
+    GameOngoing,  
+    Updating,  
     Won(PlayerTag),
 }
 

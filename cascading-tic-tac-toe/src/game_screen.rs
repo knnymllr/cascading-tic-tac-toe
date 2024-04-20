@@ -2,8 +2,7 @@ use crate::utils::despawn_screen::despawn_screen;
 use crate::{
     board_cell_interaction_system, button_interactions, on_cell_clicked, setup_board,
     setup_instructions, setup_menu_button, setup_scores_text, update_instruction_on_state_change,
-    update_scores_on_state_change, GameState, PlayerTag, PlayerTurn, PlayingState, RoundInit, RoundState,
-    WinningLogicPlugin,
+    GameState, PlayerTag, PlayerTurn, PlayingState, RoundInit, RoundState, WinningLogicPlugin,
 };
 
 use crate::timer::{time, Counter, TEXT_COLOR, TIME};
@@ -38,7 +37,23 @@ impl Plugin for GameScreen {
                 )
                     .chain(),
             )
+            .add_systems(
+                OnEnter(RoundState::UpdatingRound),
+                (
+                    despawn_screen::<GameScreenTag>,
+                    (
+                        setup_board,
+                        setup_menu_button,
+                        setup_instructions,
+                        setup_scores_text,
+                        setup_timer_text,
+                        loading_finished,
+                    )
+                        .chain(),
+                ),
+            )
             // interactions
+            .add_systems(Update, button_interactions)
             .add_systems(
                 Update,
                 (
@@ -50,51 +65,50 @@ impl Plugin for GameScreen {
                     // .chain()
                     .run_if(in_state(GameState::GameOngoing)),
             )
-            .add_systems(Update, 
-                button_interactions)
-            .add_systems(
-                Update,
-                (update_scores_on_state_change,).run_if(in_state(RoundState::UpdatingRound)),
-            )
             .add_systems(
                 OnEnter(GameState::Won(PlayerTag::X)),
-                (
-                    update_instruction_on_state_change,
-                    update_scores_on_state_change,
-                ),
+                (update_instruction_on_state_change,),
             )
             .add_systems(
                 OnEnter(GameState::Won(PlayerTag::O)),
-                (
-                    update_instruction_on_state_change,
-                    update_scores_on_state_change,
-                ),
+                (update_instruction_on_state_change,),
             )
             // teardown
             .add_systems(OnExit(PlayingState::Local), despawn_screen::<GameScreenTag>)
             //restarting game
             .add_systems(
-                OnEnter(GameState::LoadingNewGame),
+                OnEnter(GameState::RestartingGame),
                 (
-                    despawn_screen::<GameScreenTag>.before(load_new_game),
-                    load_new_game,
-                ),
+                    despawn_screen::<GameScreenTag>,
+                    restart_game,
+                    finished_restarting,
+                )
+                    .chain(),
             );
     }
 }
 
-fn loading_finished(mut next_game_state: ResMut<NextState<GameState>>) {
+fn loading_finished(
+    mut next_round_state: ResMut<NextState<RoundState>>,
+    mut next_game_state: ResMut<NextState<GameState>>,
+) {
+    next_round_state.set(RoundState::NotUpdating);
     next_game_state.set(GameState::GameOngoing);
 }
 
 //restart the game by changing states
-fn load_new_game(
-    mut next_player_turn: ResMut<NextState<PlayerTurn>>,
+fn restart_game(
     mut round_init: ResMut<RoundInit>,
-    mut next_game_state: ResMut<NextState<GameState>>,
+    mut next_player_turn: ResMut<NextState<PlayerTurn>>,
 ) {
-    next_player_turn.set(PlayerTurn::X);
     *round_init = RoundInit::new(3);
+    next_player_turn.set(PlayerTurn::X);
+}
+
+fn finished_restarting(
+    mut next_game_state: ResMut<NextState<GameState>>,
+    mut next_round_state: ResMut<NextState<RoundState>>,
+) {
     next_game_state.set(GameState::LoadingNewGame);
 }
 

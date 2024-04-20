@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::theme::theme::UiTheme;
-use crate::{GameScreenTag, RoundInit, RoundState};
+use crate::{GameScreenTag, RoundInit};
 
 #[derive(Component)]
 pub struct ScoresText;
@@ -47,7 +47,7 @@ fn text(asset_server: &Res<AssetServer>, theme: &Res<UiTheme>, label: &str) -> T
 // System to set up the game scores
 pub fn setup_scores_text(mut commands: Commands, theme: Res<UiTheme>, asset_server: Res<AssetServer>, round: Res<RoundInit>) {
     
-    let label = format!("X Score: {}\nO Score: {}", round.x_score, round.o_score);
+    let label = format!("X Score: {}\nO Score: {}\nRound Count: {}", round.x_score, round.o_score, round.round_count);
 
     commands.spawn(root()).with_children(|parent| {
         parent
@@ -56,28 +56,30 @@ pub fn setup_scores_text(mut commands: Commands, theme: Res<UiTheme>, asset_serv
     });
 }
 // System to update score text on state change
-pub fn update_scores_on_state_change(
-    round: Res<RoundInit>,
-    round_state: Res<State<RoundState>>,
-    mut next_round_state: ResMut<NextState<RoundState>>,
-    mut scores_text
-    : Query<&mut Text, With<ScoresText>>,
-) {
-    // If game state changes, update scores text accordingly
-    if round_state.is_changed() {
-        let mut ui_text = scores_text.single_mut();
-        let new_scores_text = format!("X Score: {}\nO Score: {}", round.x_score, round.o_score);
+// pub fn update_scores_on_state_change(
+//     round: Res<RoundInit>,
+//     round_state: Res<State<RoundState>>,
+//     mut next_game_state: ResMut<NextState<GameState>>,
+//     mut next_round_state: ResMut<NextState<RoundState>>,
+//     mut scores_text
+//     : Query<&mut Text, With<ScoresText>>,
+// ) {
+//     // If game state changes, update scores text accordingly
+//     if round_state.is_changed() {
+//         let mut ui_text = scores_text.single_mut();
+//         let new_scores_text = format!("X Score: {}\nO Score: {}\nRound Count: {}", round.x_score, round.o_score, round.round_count);
 
-        match round_state.get() {
-            &RoundState::NotUpdating => {
-                ui_text.sections[0].value = new_scores_text;
+//         match round_state.get() {
+//             &RoundState::NotUpdating => {
+//                 ui_text.sections[0].value = new_scores_text;
 
-            },
-            &RoundState::UpdatingRound => {
-                ui_text.sections[0].value = new_scores_text;
-                next_round_state.set(RoundState::NotUpdating);
-            },
-        }
-    }
+//             },
+//             &RoundState::UpdatingRound => {
+//                 ui_text.sections[0].value = new_scores_text;
+//                 next_round_state.set(RoundState::NotUpdating);
+//                 next_game_state.set(GameState::GameOngoing);
+//             },
+//         }
+//     }
 
-}
+// }
