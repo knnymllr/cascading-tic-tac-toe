@@ -15,7 +15,8 @@ pub struct GridCell {
     // Max board 4,294,967,295 x 4,294,967,295
     // max number of games, n = 4,294,967,292 (MAX - 3)
     // Third option: No target, no time, play til you want to quit
-    pub cell_id: u32,      // Unique identifier for the cell
+    // pub cell_id: u32,      // Unique identifier for the cell
+    pub cell_coord: (u32,u32),      // Unique identifier for the cell
     pub state: CellState,    // TicTacToeCell component associated with the grid cell
 }
 

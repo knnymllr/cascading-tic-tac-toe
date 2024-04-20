@@ -44,10 +44,16 @@ fn text(asset_server: &Res<AssetServer>, theme: &Res<UiTheme>, label: &str) -> T
 }
 
 // System to set up the game instructions
-pub fn setup_instructions(mut commands: Commands, theme: Res<UiTheme>, asset_server: Res<AssetServer>) {
+pub fn setup_instructions(mut commands: Commands, theme: Res<UiTheme>, asset_server: Res<AssetServer>, player_turn: Res<State<PlayerTurn>>) {
     commands.spawn(root()).with_children(|parent| {
+
+        let label = match player_turn.clone() {
+            PlayerTurn::X => "Player's turn: X",
+            PlayerTurn::O => "Player's turn: O",
+        };
+
         parent
-            .spawn((text(&asset_server, &theme, "Player's turn: X"), GameScreenTag)) // Spawn text node for instruction
+            .spawn((text(&asset_server, &theme, &label), GameScreenTag)) // Spawn text node for instruction
             .insert(InstructionText); // Add InstructionText component to the text node entity
     });
 }
@@ -76,6 +82,8 @@ pub fn update_instruction_on_state_change(
             &GameState::Won(PlayerTag::X) => ui_text.sections[0].value = "X Won!!!".to_string(),
             &GameState::Won(PlayerTag::O) => ui_text.sections[0].value = "O Won!!!".to_string(),
             &GameState::GameOngoing => (),
+            &GameState::RestartingGame => (),
+            &GameState::Updating => (),
             &GameState::NotPlaying => (),
             &GameState::LoadingNewGame => (),
         }

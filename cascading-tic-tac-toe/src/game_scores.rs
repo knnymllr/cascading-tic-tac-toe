@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::theme::theme::UiTheme;
-use crate::{GameScreenTag, RoundInit, RoundState};
+use crate::{GameScreenTag, RoundInit};
 
 #[derive(Component)]
 pub struct ScoresText;
@@ -54,30 +54,4 @@ pub fn setup_scores_text(mut commands: Commands, theme: Res<UiTheme>, asset_serv
             .spawn((text(&asset_server, &theme, &label), GameScreenTag)) // Spawn text node for instruction
             .insert(ScoresText); // Add ScoresText component to the text node entity
     });
-}
-// System to update score text on state change
-pub fn update_scores_on_state_change(
-    round: Res<RoundInit>,
-    round_state: Res<State<RoundState>>,
-    mut next_round_state: ResMut<NextState<RoundState>>,
-    mut scores_text
-    : Query<&mut Text, With<ScoresText>>,
-) {
-    // If game state changes, update scores text accordingly
-    if round_state.is_changed() {
-        let mut ui_text = scores_text.single_mut();
-        let new_scores_text = format!("X Score: {}\nO Score: {}", round.x_score, round.o_score);
-
-        match round_state.get() {
-            &RoundState::NotUpdating => {
-                ui_text.sections[0].value = new_scores_text;
-
-            },
-            &RoundState::UpdatingRound => {
-                ui_text.sections[0].value = new_scores_text;
-                next_round_state.set(RoundState::NotUpdating);
-            },
-        }
-    }
-
 }

@@ -1,13 +1,14 @@
 use bevy::prelude::*;
 use bevy_kira_audio::prelude::*;
 use std::borrow::BorrowMut;
+use std::collections::HashMap;
 
 use crate::theme::theme::UiTheme;
 use crate::ui_components::bundles::{button_bundle, text_bundle};
 use crate::utils::modify_text::modify_text;
 use crate::{
-    CellState, GameScreenTag, GameState, GridCell, PlayerTag, PlayerTurn, RoundInit,
-    StateWrapper,
+    CellState, CellState::Filled, GameScreenTag, GameState, GridCell, PlayerTag, PlayerTurn,
+    RoundInit, StateWrapper,
 };
 
 /// Event triggered when a cell is clicked
@@ -198,9 +199,9 @@ pub fn square_border(theme: &Res<UiTheme>) -> NodeBundle {
     NodeBundle {
         style: Style {
             // Set the width to 50 pixels
-            width: Val::Px(50.0),
+            width: Val::Px(40.0),
             // Set the height to 50 pixels
-            height: Val::Px(50.0),
+            height: Val::Px(40.0),
             // Add a border with 2 pixels width
             border: UiRect::all(Val::Px(2.0)),
             ..Default::default()
@@ -235,37 +236,87 @@ pub fn menu_background(theme: &Res<UiTheme>) -> NodeBundle {
     }
 }
 
-fn generate_invalid_cells(n: u32, list: &mut Vec<u32>) {
-    let cols = n + 3;
+fn generate_invalid_cells(n: u32, list: &mut Vec<(u32,u32)>) {
+    // let cols = n + 3;
     for current_n in 1..=n {
-        let mut x;
         let mut y;
-        for i in 0..2 * current_n {
-            x = i;
+        for x in 0..2 * current_n {
             y = current_n + 2;
-
-            list.push(x * cols + y);
+            list.push((x,y));
         }
-        for i in 0..current_n {
-            x = (2 * current_n) + 1;
-            y = i;
-            list.push(x * cols + y);
+        for y in 0..current_n {
+            let mut x = (2 * current_n) + 1;
+            list.push((x, y));
             x = (2 * current_n) + 2;
-            list.push(x * cols + y);
+            list.push((x,y));
         }
     }
 }
+
+// pub fn setup_board(
+//     mut commands: Commands,
+//     theme: Res<UiTheme>,
+//     asset_server: Res<AssetServer>,
+// ) {
+//     let n = 5;
+//     // Spawn the root node with children
+//     commands
+//         .spawn((root(&theme), GameScreenTag))
+//         .with_children(|parent| {
+//             // Spawn the main border node with children
+//             parent.spawn(main_border(&theme)).with_children(|parent| {
+//                 // Loop through rows
+//                 for row_index in (0..2 * n + 3).rev() {
+//                     // Spawn the square row node with children
+//                     parent.spawn(square_row()).with_children(|parent| {
+//                         // Loop through columns
+//                         for column_index in 0..n + 3 {
+//                             // Calculate the cell ID
+//                             let cell_coord = (row_index, column_index);
+//                             // Spawn the square border node with children
+//                             parent.spawn(square_border(&theme)).with_children(|parent| {
+//                                 // Spawn the button node with children
+//                                 parent
+//                                     .spawn(button_bundle(
+//                                         (
+//                                             Val::Percent(100.0),
+//                                             Val::Percent(100.0),
+//                                             None,
+//                                             JustifyContent::Center,
+//                                             AlignItems::Center,
+//                                         ),
+//                                         theme.invalid,
+//                                     ))
+//                                     .with_children(|parent| {
+//                                         // Spawn the button text node
+//                                         parent.spawn(text_bundle(
+//                                             "",
+//                                             &asset_server,
+//                                             (30.0, theme.button_text),
+//                                         ));
+//                                     })
+//                                     // Insert the GridCell component
+//                                     .insert(GridCell {
+//                                         // cell_id,
+//                                         cell_coord,
+//                                         state: CellState::Invalid,
+//                                     });
+//                             });
+//                         }
+//                     });
+//                 }
+//             });
+//         });
+// }
 
 pub fn setup_board(
     mut commands: Commands,
     theme: Res<UiTheme>,
     asset_server: Res<AssetServer>,
     round_init: Res<RoundInit>,
+    cell_query: Query<&GridCell>,
 ) {
     let n = round_init.round_count;
-    let mut invalid_cells = Vec::new();
-    generate_invalid_cells(n, &mut invalid_cells);
-
     // Spawn the root node with children
     commands
         .spawn((root(&theme), GameScreenTag))
@@ -279,40 +330,9 @@ pub fn setup_board(
                         // Loop through columns
                         for column_index in 0..n + 3 {
                             // Calculate the cell ID
-                            let cell_id = (n + 3) * row_index + (column_index + 1) - 1;
-                            // println!("{} {} = {}", row_index, column_index, cell_id);
+                            let cell_coord = (row_index, column_index);
 
-                            if invalid_cells.contains(&cell_id) {
-                                // Spawn the square border node with children
-                                parent.spawn(square_border(&theme)).with_children(|parent| {
-                                    // Spawn the button node with children
-                                    parent
-                                        .spawn(button_bundle(
-                                            (
-                                                Val::Percent(100.0),
-                                                Val::Percent(100.0),
-                                                None,
-                                                JustifyContent::Center,
-                                                AlignItems::Center,
-                                            ),
-                                            theme.button,
-                                        ))
-                                        .with_children(|parent| {
-                                            // Spawn the button text node
-                                            parent.spawn(text_bundle(
-                                                "-",
-                                                &asset_server,
-                                                (30.0, theme.button_text),
-                                            ));
-                                        })
-                                        // Insert the GridCell component
-                                        .insert(GridCell {
-                                            cell_id,
-                                            state: CellState::Invalid,
-                                        });
-                                });
-                            } else {
-                                // Spawn the square border node with children
+                            if n == 0 {
                                 parent.spawn(square_border(&theme)).with_children(|parent| {
                                     // Spawn the button node with children
                                     parent
@@ -336,10 +356,124 @@ pub fn setup_board(
                                         })
                                         // Insert the GridCell component
                                         .insert(GridCell {
-                                            cell_id,
+                                            cell_coord,
                                             state: CellState::Valid,
                                         });
                                 });
+                            } else {
+                                let mut invalid_cells = Vec::new();
+                                generate_invalid_cells(n, &mut invalid_cells);
+
+                                let mut filled_cells = HashMap::new();
+                                for cell in cell_query.iter() {
+                                    if cell.state == Filled(PlayerTag::X)
+                                        || cell.state == Filled(PlayerTag::O)
+                                    {
+                                        filled_cells.insert(cell.cell_coord, cell.state.clone());
+                                    }
+                                }
+
+                                if invalid_cells.contains(&cell_coord) {
+                                    // Spawn the square border node with children
+                                    parent.spawn(square_border(&theme)).with_children(|parent| {
+                                        // Spawn the button node with children
+                                        parent
+                                            .spawn(button_bundle(
+                                                (
+                                                    Val::Percent(100.0),
+                                                    Val::Percent(100.0),
+                                                    None,
+                                                    JustifyContent::Center,
+                                                    AlignItems::Center,
+                                                ),
+                                                theme.button,
+                                            ))
+                                            .with_children(|parent| {
+                                                // Spawn the button text node
+                                                parent.spawn(text_bundle(
+                                                    "-",
+                                                    &asset_server,
+                                                    (30.0, theme.button_text),
+                                                ));
+                                            })
+                                            // Insert the GridCell component
+                                            .insert(GridCell {
+                                                cell_coord,
+                                                state: CellState::Invalid,
+                                            });
+                                    });
+                                } else if filled_cells.contains_key(&cell_coord) {
+                                    if let Some(cell_state) = filled_cells.get(&cell_coord) {
+                                        // cell_state is a reference to the CellState value
+                                        let retrieved_state = cell_state.clone();
+                                        // Spawn the square border node with children
+                                        parent.spawn(square_border(&theme)).with_children(
+                                            |parent| {
+                                                // Spawn the button node with children
+                                                match cell_state {
+                                                    Filled(tag) => {
+                                                        parent
+                                                            .spawn(button_bundle(
+                                                                (
+                                                                    Val::Percent(100.0),
+                                                                    Val::Percent(100.0),
+                                                                    None,
+                                                                    JustifyContent::Center,
+                                                                    AlignItems::Center,
+                                                                ),
+                                                                theme.button,
+                                                            ))
+                                                            .with_children(|parent| {
+                                                                // Spawn the button text node
+                                                                parent.spawn(text_bundle(
+                                                                    &tag.to_string(),
+                                                                    &asset_server,
+                                                                    (30.0, theme.button_text),
+                                                                ));
+                                                            })
+                                                            // Insert the GridCell component
+                                                            .insert(GridCell {
+                                                                cell_coord,
+                                                                state: retrieved_state,
+                                                            });
+                                                    }
+                                                    _ => println!("Not a filled cell"),
+                                                }
+                                            },
+                                        );
+                                    } else {
+                                        println!("({},{}) not found in HashMap", cell_coord.0, cell_coord.1);
+                                    }
+                                } else {
+                                    // Spawn the square border node with children
+                                    parent.spawn(square_border(&theme)).with_children(|parent| {
+                                        // Spawn the button node with children
+                                        parent
+                                            .spawn(button_bundle(
+                                                (
+                                                    Val::Percent(100.0),
+                                                    Val::Percent(100.0),
+                                                    None,
+                                                    JustifyContent::Center,
+                                                    AlignItems::Center,
+                                                ),
+                                                theme.button,
+                                            ))
+                                            .with_children(|parent| {
+                                                // Spawn the button text node
+                                                parent.spawn(text_bundle(
+                                                    "",
+                                                    &asset_server,
+                                                    (30.0, theme.button_text),
+                                                ));
+                                            })
+                                            // Insert the GridCell component
+                                            .insert(GridCell {
+                                                cell_coord,
+                                                state: CellState::Valid,
+                                            });
+                                    });
+                                }
                             }
                         }
                     });

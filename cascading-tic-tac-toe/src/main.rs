@@ -56,11 +56,6 @@ fn main() {
         ..default()
     }))
     .add_plugins(AudioPlugin)
-    // .insert_resource(ResolutionSettings {
-    //     large: Vec2::new(1920.0, 1080.0),
-    //     medium: Vec2::new(1000.0, 600.0),
-    //     small: Vec2::new(560.0, 820.0),
-    // })
     .insert_resource(DisplaySize::Medium)
     .insert_resource(SoundVolume(7))
     .init_resource::<UiTheme>()
