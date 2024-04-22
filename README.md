@@ -25,6 +25,8 @@ Xu Jiang
 - Double-click to open the **.exe** file
 - You will see the game window appearing on your screen. 
 
+For macOS users see how to run an app from an unidentified developer: https://support.apple.com/guide/mac-help/open-a-mac-app-from-an-unidentified-developer-mh40616/mac
+
 # How to contribute
 Follow this project board to know the latest status of the project: [https://github.com/orgs/cis3296s24/projects/61]
 
