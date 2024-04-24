@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use crate::{DisplaySize, SelectedOption, MenuButtonAction, OnDisplaySettingsMenuScreen, ResolutionSettings, main_menu::*};
 
-
+/// System to setup the Display resolution Settings menu
 pub fn display_settings_menu_setup(mut commands: Commands, display_quality: Res<DisplaySize>) {
     let button_style = Style {
         width: Val::Px(200.0),
