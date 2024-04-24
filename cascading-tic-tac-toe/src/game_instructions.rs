@@ -3,6 +3,7 @@ use bevy::prelude::*;
 use crate::{GameScreenTag, GameState, PlayerTag, PlayerTurn};
 use crate::theme::theme::UiTheme;
 
+/// Component to hold the gameplay instructions text
 #[derive(Component)]
 pub struct InstructionText;
 
