@@ -7,7 +7,7 @@ use crate::theme::theme::UiTheme;
 #[derive(Component)]
 pub struct InstructionText;
 
-// Define the root node for the UI instruction text
+/// Define the root node for the UI instruction text
 fn root() -> NodeBundle {
     NodeBundle {
         style: Style {
@@ -29,7 +29,7 @@ fn root() -> NodeBundle {
     }
 }
 
-// Function to create the text node for UI instruction
+/// Function to create the text node for UI instruction
 fn text(asset_server: &Res<AssetServer>, theme: &Res<UiTheme>, label: &str) -> TextBundle {
     return TextBundle {
         text: Text::from_section(
@@ -44,7 +44,7 @@ fn text(asset_server: &Res<AssetServer>, theme: &Res<UiTheme>, label: &str) -> T
     };
 }
 
-// System to set up the game instructions
+/// System to set up the game instructions
 pub fn setup_instructions(mut commands: Commands, theme: Res<UiTheme>, asset_server: Res<AssetServer>, player_turn: Res<State<PlayerTurn>>) {
     commands.spawn(root()).with_children(|parent| {
 
@@ -59,7 +59,7 @@ pub fn setup_instructions(mut commands: Commands, theme: Res<UiTheme>, asset_ser
     });
 }
 
-// System to update the game instructions based on state changes
+/// System to update the game instructions based on state changes
 pub fn update_instruction_on_state_change(
     player_turn_state: Res<State<PlayerTurn>>,
     game_state: Res<State<GameState>>,
