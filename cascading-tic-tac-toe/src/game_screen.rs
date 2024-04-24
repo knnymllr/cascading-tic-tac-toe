@@ -11,11 +11,14 @@ use bevy::prelude::*;
 use bevy::prelude::{in_state, Component, IntoSystemConfigs, NextState, OnEnter, ResMut};
 use std::time::Duration;
 
+/// Component that stores the gameboard screen to spawn/despawn
 #[derive(Component)]
 pub struct GameScreenTag;
 
+/// Defines a struct for a Plugin for app creation in main.rs
 pub struct GameScreen;
 
+/// A Plugin for use in primary app creation in main.rs
 impl Plugin for GameScreen {
     fn build(&self, app: &mut App) {
         app.add_event::<crate::CellClickedEvent>()
@@ -116,6 +119,7 @@ impl Plugin for GameScreen {
     }
 }
 
+/// A system that handles state change after all setup systems have run
 fn loading_finished(
     mut next_round_state: ResMut<NextState<RoundState>>,
     mut next_game_state: ResMut<NextState<GameState>>,
@@ -124,7 +128,7 @@ fn loading_finished(
     next_game_state.set(GameState::GameOngoing);
 }
 
-//restart the game by changing states
+/// A system that triggers restarting the game by changing states
 fn restart_game(
     mut round_init: ResMut<RoundInit>,
     mut next_player_turn: ResMut<NextState<PlayerTurn>>,
@@ -133,10 +137,12 @@ fn restart_game(
     next_player_turn.set(PlayerTurn::X);
 }
 
+/// A system that flags when restarting the game has completed
 fn finished_restarting(mut next_game_state: ResMut<NextState<GameState>>) {
     next_game_state.set(GameState::LoadingNewGame);
 }
 
+/// A system that handles the timer countdown in the gamescreen
 fn setup_timer_text(mut commands: Commands, asset_sever: Res<AssetServer>) {
     let counter = Counter::new();
     //counter.pause();
@@ -163,6 +169,7 @@ fn setup_timer_text(mut commands: Commands, asset_sever: Res<AssetServer>) {
         .insert(counter);
 }
 
+/// A system that updates the current value of the countdown timer
 fn update_time(mut query: Query<(&mut Text, &mut Counter)>, os_time: Res<Time>) {
     for (mut text, mut counter) in &mut query {
         if counter.paused() {
