@@ -1,9 +1,12 @@
 use bevy::prelude::*;
 
 use crate::{CellState, GameState, GridCell, PlayerTag, RoundInit, RoundState};
-/// Plugin for handling winning logic in tic-tac-toe game
+
+/// Struct for handling winning logic in tic-tac-toe game
 pub struct WinningLogicPlugin;
 
+/// Plugin that defines the contents of WinningLogicPlugin struct
+/// Checks for valid winning combinations only when game is ongoing (not updating)
 impl Plugin for WinningLogicPlugin {
     fn build(&self, app: &mut App) {
         // Add the system for checking winning conditions
@@ -15,7 +18,8 @@ impl Plugin for WinningLogicPlugin {
     }
 }
 
-/// Test comment
+/// System that checks whether the entire game is over 
+/// Valid for target score mode only
 fn is_game_over(
     round: Res<RoundInit>,
     mut next_game_state: ResMut<NextState<GameState>>,
@@ -31,7 +35,8 @@ fn is_game_over(
     }
 }
 
-/// System for checking if the game is over
+/// System for checking if a round is over by scanning for winning combination
+/// or a draw (all cells are filled, no remaining valid moves)
 fn is_round_over(
     cells_query: Query<&GridCell>,
     mut update_game: ResMut<NextState<GameState>>,
@@ -80,6 +85,7 @@ fn is_round_over(
     }
 }
 
+/// Algorithm to ensure that 4+ in a row is not scored as a valid combination
 fn has_two_tuples(
     game_combinations: &mut Vec<[(u32, u32); 3]>,
     winning_combination: &[(u32, u32); 3],
@@ -118,7 +124,7 @@ fn has_two_tuples(
 //     false
 // }
 
-/// Check if a player has won
+/// Check if a player has scored a winning combination
 fn is_winner(
     cells: &Vec<CellState>,
     n: u32,
@@ -157,6 +163,7 @@ fn is_winner(
     return false;
 }
 
+/// Algorithm to generate all valid winning combinations based on the number of rounds played, n
 fn generate_winning_combinations(round_init: u32, winners: &mut Vec<[(u32, u32); 3]>) {
     for n in 0..=round_init {
         // horizontal
@@ -182,13 +189,13 @@ fn generate_winning_combinations(round_init: u32, winners: &mut Vec<[(u32, u32);
     }
 }
 
+/// System to convert (x,y) coordinate to integer id based on the number of columns in the full map
 fn get_index(x: u32, y: u32, num_cols: u32) -> usize {
     let index = (x * num_cols) + y;
     index as usize // Cast to usize if needed
 }
 
-/// Check if the game is a draw
-///! WILL BE REFACTORED
+/// Check if the game is a draw (no remaining valid moves)
 fn is_draw(cells: &Vec<CellState>) -> bool {
     // If there are no Valid cells left, the game is a draw
     !cells.iter().any(|element| *element == CellState::Valid)
