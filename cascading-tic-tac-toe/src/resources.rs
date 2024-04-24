@@ -2,6 +2,9 @@
 
 use bevy::prelude::*;
 
+/// A resource that keeps track of player score, target score/time,
+/// the number of rounds played, and a vector holding arrays of tuples
+/// that signify the valid winning combinations on the board
 #[derive(Resource)]
 pub struct RoundInit {
     pub round_count: u32,
@@ -12,6 +15,7 @@ pub struct RoundInit {
     pub game_combinations: Vec<[(u32,u32);3]>
 }
 
+/// A constructor for RoundInit
 impl RoundInit {
     pub fn new(init_target: u32) -> Self {
         RoundInit {

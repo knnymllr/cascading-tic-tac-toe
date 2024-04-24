@@ -3,10 +3,11 @@ use bevy::prelude::*;
 use crate::theme::theme::UiTheme;
 use crate::{GameScreenTag, RoundInit};
 
+/// Component to store the game scores text
 #[derive(Component)]
 pub struct ScoresText;
 
-// Define the root node for the UI scores text
+/// Define the root node for the UI scores text
 fn root() -> NodeBundle {
     NodeBundle {
         style: Style {
@@ -29,7 +30,7 @@ fn root() -> NodeBundle {
     }
 }
 
-// Function to create the text node for UI instruction
+/// Function to create the text node for UI instruction
 fn text(asset_server: &Res<AssetServer>, theme: &Res<UiTheme>, label: &str) -> TextBundle {
     return TextBundle {
         text: Text::from_section(
@@ -44,7 +45,7 @@ fn text(asset_server: &Res<AssetServer>, theme: &Res<UiTheme>, label: &str) -> T
     };
 }
 
-// System to set up the game scores
+/// System to set up the game scores
 pub fn setup_scores_text(mut commands: Commands, theme: Res<UiTheme>, asset_server: Res<AssetServer>, round: Res<RoundInit>) {
     
     let label = format!("X Score: {}\nO Score: {}", round.x_score, round.o_score);

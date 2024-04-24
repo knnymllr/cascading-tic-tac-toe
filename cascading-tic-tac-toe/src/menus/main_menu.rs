@@ -8,21 +8,24 @@ use bevy::{app::AppExit, prelude::*};
 use crate::ui_components::bundles::{button_bundle, image_bundle, text_bundle};
 use crate::utils::despawn_screen::despawn_screen;
 
-//colors
+/// Colors for main menu
 pub const TEXT_COLOR: Color = Color::rgb(0.9, 0.9, 0.9);
 pub const NORMAL_BUTTON: Color = Color::rgb(0.15, 0.15, 0.15);
 pub const HOVERED_BUTTON: Color = Color::rgb(0.25, 0.25, 0.25);
 pub const HOVERED_PRESSED_BUTTON: Color = Color::rgb(0.25, 0.65, 0.25);
 pub const PRESSED_BUTTON: Color = Color::rgb(0.35, 0.75, 0.35);
 
+/// Struct to store button parameters
 struct ButtonParams {
     text: &'static str,
     text_color: Color,
     icon_path: &'static str,
     action: MenuButtonAction,
 }
+/// A struct for the MenuPlugin
 pub struct MenuPlugin;
 
+/// A plugin that implements the MenuPlugin for the main application initialization
 impl Plugin for MenuPlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(ResolutionSettings {
@@ -75,6 +78,7 @@ impl Plugin for MenuPlugin {
     }
 }
 
+/// A system that creates the main menu
 fn main_menu_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     let buttons = vec![
         ButtonParams {
@@ -162,8 +166,8 @@ fn main_menu_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         });
 }
 
-// This system updates the settings when a new value for a setting is selected,
-// and marks the button as the one currently selected
+/// This system updates the settings when a new value for a setting is selected,
+/// and marks the button as the one currently selected
 fn setting_button<T: Resource + Component + PartialEq + Copy>(
     interaction_query: Query<(&Interaction, &T, Entity), (Changed<Interaction>, With<Button>)>,
     mut selected_query: Query<(Entity, &mut BackgroundColor), With<SelectedOption>>,
@@ -181,6 +185,7 @@ fn setting_button<T: Resource + Component + PartialEq + Copy>(
     }
 }
 
+/// This system sets up the settings menu to toggle resolution and sound volume
 fn settings_menu_setup(mut commands: Commands) {
     let button_style = Style {
         width: Val::Px(200.0),
@@ -248,7 +253,7 @@ fn settings_menu_setup(mut commands: Commands) {
         });
 }
 
-// This system handles changing all buttons color based on mouse interaction
+/// This system handles changing all buttons color based on mouse interaction
 fn button_system(
     mut interaction_query: Query<
         (&Interaction, &mut BackgroundColor, Option<&SelectedOption>),
@@ -265,6 +270,7 @@ fn button_system(
     }
 }
 
+/// A system for handling individual menu actions (Pressed)
 fn menu_action(
     interaction_query: Query<
         (&Interaction, &MenuButtonAction),

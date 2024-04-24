@@ -15,6 +15,7 @@ pub struct UiTheme {
     pub button_text_hovered: Color,
 }
 
+/// Implement the UiTheme for the entire game from the Bevy-supplied World
 impl FromWorld for UiTheme {
     fn from_world(_: &mut World) -> Self {
         UiTheme {
