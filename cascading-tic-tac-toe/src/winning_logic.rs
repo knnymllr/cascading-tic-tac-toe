@@ -15,6 +15,7 @@ impl Plugin for WinningLogicPlugin {
     }
 }
 
+/// Test comment
 fn is_game_over(
     round: Res<RoundInit>,
     mut next_game_state: ResMut<NextState<GameState>>,
