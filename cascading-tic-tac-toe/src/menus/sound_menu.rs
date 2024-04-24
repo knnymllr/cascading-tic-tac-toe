@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 use crate::{SelectedOption,SoundVolume,MenuButtonAction,MyMusic,OnSoundSettingsMenuScreen,main_menu::*};
 
+/// A system that sets up the sound settings menu
 pub fn sound_settings_menu_setup(mut commands: Commands, volume: Res<SoundVolume>) {
     let button_style = Style {
         width: Val::Px(200.0),
@@ -90,6 +91,7 @@ pub fn sound_settings_menu_setup(mut commands: Commands, volume: Res<SoundVolume
         });
 }
 
+/// A system for the user to dynamically toggle the volume of the game soundtrack
 pub fn toggle_volume(
     interaction_query: Query<
     (&Interaction, &SoundVolume),(Changed<Interaction>, With<Button>),>,
