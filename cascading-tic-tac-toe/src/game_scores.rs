@@ -3,6 +3,7 @@ use bevy::prelude::*;
 use crate::theme::theme::UiTheme;
 use crate::{GameScreenTag, RoundInit};
 
+/// Component to store the game scores text
 #[derive(Component)]
 pub struct ScoresText;
 
