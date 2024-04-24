@@ -4,6 +4,7 @@ use bevy::prelude::*;
 pub const TIME: u16 = 10*60;
 pub const TEXT_COLOR: Color = Color::WHITE;
 
+/// Component that stores dynamic countdown timer
 #[derive(Component)]
 
 pub struct Counter{
@@ -11,7 +12,7 @@ pub struct Counter{
     pub unit: Timer,
 }
 
-
+/// A constructor for the Counter component
 impl Counter{
     pub fn new() -> Counter {
         Self {
@@ -44,6 +45,7 @@ impl Counter{
     }
 }
 
+/// System to dynamically update the time displayed to screen
 pub fn time(duration: Duration) -> String{
     let mut minute = 0;
     let mut hour = 0;
