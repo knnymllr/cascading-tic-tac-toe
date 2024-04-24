@@ -1,18 +1,20 @@
 # Cascading Tic-Tac-Toe
+
 This is a small Tic-Tac-Toe variation game with more **Complexity** and more **Fun**! 
-<br>
+
 This variant is played with two players and each player can control where they place their respective ‘X’ or ‘O’ pieces on the board. Players can choose whether to set a target score (i.e.–first to five) or a timer where the highest score wins at the end and ties are broken with sudden death.  
+
 **New Rule1**
-<br>
+
 It contains a continuous variant of tic-tac-toe where a tie between players or a valid combination of three spaces in a row generates an additional 3x3 board that overlaps the previous board cascading down and to the right. 
-<br>
+
 **New Rule2**
-<br>
+
 When a space has been used in a valid combination of three it may still be used in another combination of three if it does not create a combination of four or more. 
 
 
 ## Example
-![This is a mockup of Cascading Tic-Tac-Toe.](image.png)
+![This is a screenshot Cascading Tic-Tac-Toe.](image.png)
 
 ## Team Member
 Xu Jiang
