@@ -1,6 +1,7 @@
 use bevy::prelude::{AlignItems, AssetServer, ButtonBundle, Color, default, ImageBundle, JustifyContent, PositionType, Res, Style, Text, TextBundle, TextStyle, UiImage, UiRect, Val};
 use bevy::ui::BackgroundColor;
 
+/// ImageBundle for creating game icon
 pub fn image_bundle(
     image: UiImage
 ) -> ImageBundle {
@@ -16,6 +17,7 @@ pub fn image_bundle(
     }
 }
 
+/// Bundle for spawning UI buttons
 pub fn button_bundle(
     style: (Val, Val, Option<UiRect>, JustifyContent, AlignItems),
     background_color: BackgroundColor
@@ -37,6 +39,7 @@ pub fn button_bundle(
     }
 }
 
+/// TextBundle for spawning text on screen
 pub fn text_bundle(
     label: &str,
     asset_server: &Res<AssetServer>,

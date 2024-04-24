@@ -1,6 +1,7 @@
 use bevy::asset::Handle;
 use bevy::prelude::{Children, Color, Font, Query, Text};
 
+/// System to modify gameboard cell text
 pub fn modify_text(
     children: &Children,
     cell_text_query: &mut Query<&mut Text>,
