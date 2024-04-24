@@ -17,7 +17,7 @@ pub struct CellClickedEvent {
     entity: Entity,
 }
 
-/// System for handling board cell interaction
+/// System for handling board cell interaction events (Pressed, Hovered, None)
 pub fn board_cell_interaction_system(
     theme: Res<UiTheme>,
     player_turn: ResMut<State<PlayerTurn>>,
@@ -72,7 +72,8 @@ pub fn board_cell_interaction_system(
     }
 }
 
-/// System for handling cell click events
+/// System for handling cell click (Pressed) events
+/// Play audio, update cell state and text, update player turn
 pub fn on_cell_clicked(
     theme: Res<UiTheme>,
     mut events: EventReader<CellClickedEvent>,
@@ -144,7 +145,7 @@ fn update_player_turn(state: &mut StateWrapper<PlayerTurn>) {
     state.next.set(next_state);
 }
 
-/// Creates the root node for the UI
+/// Creates the root node for the gameboard UI
 pub fn root(theme: &Res<UiTheme>) -> NodeBundle {
     NodeBundle {
         style: Style {
@@ -160,6 +161,7 @@ pub fn root(theme: &Res<UiTheme>) -> NodeBundle {
     }
 }
 
+/// Define a primary border for the full map
 pub fn main_border(theme: &Res<UiTheme>) -> NodeBundle {
     // Define the style for the main border node
     NodeBundle {
@@ -180,6 +182,7 @@ pub fn main_border(theme: &Res<UiTheme>) -> NodeBundle {
     }
 }
 
+/// Define a square row to place inside main border
 pub fn square_row() -> NodeBundle {
     // Define the style for a square row node
     NodeBundle {
@@ -194,6 +197,7 @@ pub fn square_row() -> NodeBundle {
     }
 }
 
+/// Define a border for each individual cell on gameboard
 pub fn square_border(theme: &Res<UiTheme>) -> NodeBundle {
     // Define the style for a square border node
     NodeBundle {
@@ -212,6 +216,7 @@ pub fn square_border(theme: &Res<UiTheme>) -> NodeBundle {
     }
 }
 
+/// Creates a NodeBundle for the in-game menu buttons
 pub fn menu_background(theme: &Res<UiTheme>) -> NodeBundle {
     // Define the style for the menu background node
     NodeBundle {
@@ -236,6 +241,8 @@ pub fn menu_background(theme: &Res<UiTheme>) -> NodeBundle {
     }
 }
 
+/// Algorithm to determine which cells on gameboard are invalid based
+/// on the number of rounds, n, played so far
 fn generate_invalid_cells(n: u32, list: &mut Vec<(u32,u32)>) {
     // let cols = n + 3;
     for current_n in 1..=n {
@@ -253,62 +260,9 @@ fn generate_invalid_cells(n: u32, list: &mut Vec<(u32,u32)>) {
     }
 }
 
-// pub fn setup_board(
-//     mut commands: Commands,
-//     theme: Res<UiTheme>,
-//     asset_server: Res<AssetServer>,
-// ) {
-//     let n = 5;
-//     // Spawn the root node with children
-//     commands
-//         .spawn((root(&theme), GameScreenTag))
-//         .with_children(|parent| {
-//             // Spawn the main border node with children
-//             parent.spawn(main_border(&theme)).with_children(|parent| {
-//                 // Loop through rows
-//                 for row_index in (0..2 * n + 3).rev() {
-//                     // Spawn the square row node with children
-//                     parent.spawn(square_row()).with_children(|parent| {
-//                         // Loop through columns
-//                         for column_index in 0..n + 3 {
-//                             // Calculate the cell ID
-//                             let cell_coord = (row_index, column_index);
-//                             // Spawn the square border node with children
-//                             parent.spawn(square_border(&theme)).with_children(|parent| {
-//                                 // Spawn the button node with children
-//                                 parent
-//                                     .spawn(button_bundle(
-//                                         (
-//                                             Val::Percent(100.0),
-//                                             Val::Percent(100.0),
-//                                             None,
-//                                             JustifyContent::Center,
-//                                             AlignItems::Center,
-//                                         ),
-//                                         theme.invalid,
-//                                     ))
-//                                     .with_children(|parent| {
-//                                         // Spawn the button text node
-//                                         parent.spawn(text_bundle(
-//                                             "",
-//                                             &asset_server,
-//                                             (30.0, theme.button_text),
-//                                         ));
-//                                     })
-//                                     // Insert the GridCell component
-//                                     .insert(GridCell {
-//                                         // cell_id,
-//                                         cell_coord,
-//                                         state: CellState::Invalid,
-//                                     });
-//                             });
-//                         }
-//                     });
-//                 }
-//             });
-//         });
-// }
-
+/// Algorithm to generate the gameboard based on the number of rounds, n,
+/// and determine which cells are valid, invalid, or already filled from
+/// a previous round
 pub fn setup_board(
     mut commands: Commands,
     theme: Res<UiTheme>,
