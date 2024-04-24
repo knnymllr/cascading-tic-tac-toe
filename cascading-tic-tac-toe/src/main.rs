@@ -45,6 +45,8 @@ mod utils {
     pub mod modify_text;
 }
 
+/// This is the main driver of the application
+/// All primary Plugins, Resources, and States are included here
 fn main() {
     let mut app = App::new();
     app.add_plugins(DefaultPlugins.set(WindowPlugin {
@@ -72,6 +74,7 @@ fn main() {
     .run();
 }
 
+/// A system to initialize the background music when the application begins
 fn start_background_audio(asset_server: Res<AssetServer>, mut commands: Commands) {
     commands.spawn((
         AudioBundle {
@@ -82,6 +85,7 @@ fn start_background_audio(asset_server: Res<AssetServer>, mut commands: Commands
     ));
 }
 
+/// A system to set the application icon for binary
 fn set_window_icon(
     windows: NonSend<WinitWindows>,
     primary_window: Query<Entity, With<PrimaryWindow>>,
@@ -101,6 +105,7 @@ fn set_window_icon(
     };
 }
 
+/// Out of the box system to spawn a Camera2dBundle
 fn place_camera(mut commands: Commands) {
     commands.spawn(Camera2dBundle::default());
 }
