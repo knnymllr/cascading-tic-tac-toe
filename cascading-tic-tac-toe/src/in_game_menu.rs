@@ -3,6 +3,7 @@ use bevy::prelude::*;
 use crate::{GameScreenTag, GameState, MenuState, PlayingState, RoundState};
 use crate::theme::theme::UiTheme;
 
+/// Component that stores all in-game menu buttons
 #[derive(Component)]
 pub enum InGameButtonActions{
     MainMenuButton,
@@ -10,7 +11,7 @@ pub enum InGameButtonActions{
 }
 
 
-// Define the root node for the UI of buttons
+/// Define the root node for the UI of buttons
 fn root(button:InGameButtonActions) -> NodeBundle {
     let height;
     match button {
@@ -41,7 +42,7 @@ fn root(button:InGameButtonActions) -> NodeBundle {
     }
 }
 
-// Define the button node for the UI
+/// Define the button node for the UI
 pub fn button_game(theme: &Res<UiTheme>) -> ButtonBundle {
     ButtonBundle {
         style: Style {
@@ -57,7 +58,7 @@ pub fn button_game(theme: &Res<UiTheme>) -> ButtonBundle {
     }
 }
 
-// Define the text node for the button
+/// Define the text node for the button
 pub fn button_text_game(
     asset_server: &Res<AssetServer>,
     theme: &Res<UiTheme>,
@@ -76,7 +77,7 @@ pub fn button_text_game(
     };
 }
 
-// System to set up the restart button
+/// System to set up the restart button
 pub fn setup_menu_button(
     mut commands: Commands,
     theme: Res<UiTheme>,
@@ -98,7 +99,7 @@ pub fn setup_menu_button(
     });
 }
 
-// System to handle interactions with the in game menu buttons
+/// System to handle interactions with the in game menu buttons
 pub fn button_interactions(
     theme: Res<UiTheme>,
     mut buttons: Query<
