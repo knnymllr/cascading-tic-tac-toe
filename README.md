@@ -1,43 +1,91 @@
-# Cascading Tic-Tac-Toe
+# Cascading Tic Tac Toe
 
-This is a small Tic-Tac-Toe variation game with more **Complexity** and more **Fun**! 
+[Downloads & Release notes][github-release-link] | [Contributing to Cascading Tic Tac Toe](#contributing) | [Latest Update](#latest-update)
 
-This variant is played with two players and each player can control where they place their respective ‘X’ or ‘O’ pieces on the board. Players can choose whether to set a target score (i.e.–first to five) or a timer where the highest score wins at the end and ties are broken with sudden death.  
+## Build status
 
-**New Rule1**
+| Architecture | Solution (Main) | Installer (Main) |
+|--------------|-----------------|------------------|
+| x64          | Working         | Working          |
+| darwin       | Working         | Working          |
 
-It contains a continuous variant of tic-tac-toe where a tie between players or a valid combination of three spaces in a row generates an additional 3x3 board that overlaps the previous board cascading down and to the right. 
+## About
 
-**New Rule2**
+Cascading Tic Tac Toe is a novel take on the more well-known Tic Tac Toe with a dynamic game board and increased complexity.
 
-When a space has been used in a valid combination of three it may still be used in another combination of three if it does not create a combination of four or more. 
+|                 | Current Features: |                |
+|-----------------|-------------------|----------------|
+| Cascading Board | Target Score Mode | Interactive UI |
 
+![This is a mockup of Cascading Tic-Tac-Toe](image.png)
 
-## Example
-![This is a screenshot Cascading Tic-Tac-Toe.](image.png)
+### Rules
+1. Games can be played until either a target score reached or a target time is elapsed.
+2. A tie or a valid combination of three spaces in a row generates an additional 3x3 board that overlaps the previous board cascading down and to the right.
+3. When a space has been used in a valid combination of three it may still be used in another combination of three if it does not create a combination of four or more.
 
-## Team Member
-Xu Jiang
-<br>Kenny Miller
-<br>Paul M Sedra
-<br>Dongting Gao
+## Installing & Running Cascading Tic Tac Toe
 
-# How to run
-- Download the latest binary from the Release section on the right on GitHub.  
-- Double-click to open the **.exe** file
-- You will see the game window appearing on your screen. 
+### Requirements
 
-For macOS users see how to run an app from an unidentified developer: https://support.apple.com/guide/mac-help/open-a-mac-app-from-an-unidentified-developer-mh40616/mac
+- Windows 11+
+- macOS 11+
 
-# How to contribute
-Follow this project board to know the latest status of the project: [https://github.com/orgs/cis3296s24/projects/61]
+### Via GitHub Release [Recommended]
 
-### How to build
-- Use this GitHub repository: [https://github.com/cis3296s24/cascading-tic-tac-toe] to clone necessary files from the main branch
-- Install Rust
-          <br>-- On Windows, go to https://www.rust-lang.org/tools/install
-          <br>-- On Linux or macOS, open a terminal and enter the following command:
-  <br>
-  ```$ curl --proto '=https' --tlsv1.2 https://sh.rustup.rs -sSf | sh```
-- Execute ```$cargo run``` under the src directory using basic command terminal: cmd or PowerShell(Windows)
-- Once the app starts, you will see a window that contains our game, Good Luck!
+Go to the [Cascading Tic Tac Toe GitHub releases page][github-release-link] and click on `Assets` at the bottom to show the files available in the release. Use the appropriate Cascading Tic Tac Toe installer that matches your machine's architecture.
+
+<!-- items that need to be updated with every release -->
+[X64]: https://github.com/cis3296s24/cascading-tic-tac-toe/releases/download/v0.5/cascading-tic-tac-toe-0.5-x64.zip
+[darwin]: https://github.com/cis3296s24/cascading-tic-tac-toe/releases/download/v0.5/cascading-tic-tac-toe-0.5-dmg.zip
+ 
+| Description | Filename                                    |
+|-------------|---------------------------------------------|
+| X64         | [cascading-tic-tac-toe-0.5-x64.zip][X64]    |
+| darwin      | [cascading-tic-tac-toe-0.5-dmg.zip][darwin] |
+
+## Contributing
+
+This project welcomes contributions of all types. We are excited to work with the rust community to create working examples using Bevy.
+
+### Requirements
+
+- Windows 11+ or macOS 11+
+- [Rust 1.77+](https://www.rust-lang.org/tools/install)
+- Other dependencies outlined in [Cargo.toml](https://github.com/cis3296s24/cascading-tic-tac-toe/blob/main/cascading-tic-tac-toe/Cargo.toml)
+
+### Fork, Clone, Branch, & Create PR
+
+1. Fork the repo on [GitHub]()
+2. Clone fork locally
+3. Execute `cargo run` under src directory to run the game
+4. Create feature branch
+5. Work on changes
+6. Create Pull Request
+
+### Contributors 
+[Xu Jiang](https://github.com/XJ114514)<br>
+[Kenny Miller](https://github.com/knnymllr)<br>
+[Paul Sedra](https://github.com/PaulSedra)<br>
+[Dongting Gao](https://github.com/gdtmax)
+
+## Latest Update 
+
+### 0.5 - January 2024 Update
+
+In this release, we focused on bug fixes and documentation.
+
+#### Highlights
+- continuous generating board by [Kenny Miller](https://github.com/knnymllr) in [#101](https://github.com/cis3296s24/cascading-tic-tac-toe/pull/101)
+- Ingame mainmenu bugfix by [Kenny Miller](https://github.com/knnymllr) in [#102](https://github.com/cis3296s24/cascading-tic-tac-toe/pull/102)
+- update README.md for macOS users by [Paul Sedra](https://github.com/PaulSedra) in [#103](https://github.com/cis3296s24/cascading-tic-tac-toe/pull/103)
+
+#### What is planned for version 0.6
+
+For v0.6, we'll work on the items below:
+
+--
+
+<!-- Links -->
+[github-repo]: https://github.com/cis3296s24/cascading-tic-tac-toe
+[github-release-link]: https://github.com/cis3296s24/cascading-tic-tac-toe/releases
